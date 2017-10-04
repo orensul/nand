@@ -1,0 +1,56 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/DMux8Way.hdl
+
+/**
+ * 8-way demultiplexor:
+ * {a, b, c, d, e, f, g, h} = {in, 0, 0, 0, 0, 0, 0, 0} if sel == 000
+ *                            {0, in, 0, 0, 0, 0, 0, 0} if sel == 001
+ *                            {0, 0, in, 0, 0, 0, 0, 0} if sel == 010
+ *                            {0, 0, 0, in, 0, 0, 0, 0} if sel == 011
+ *                            {0, 0, 0, 0, in, 0, 0, 0} if sel == 100
+ *                            {0, 0, 0, 0, 0, in, 0, 0} if sel == 101
+ *                            {0, 0, 0, 0, 0, 0, in, 0} if sel == 110
+ *                            {0, 0, 0, 0, 0, 0, 0, in} if sel == 111
+ */
+
+CHIP DMux8Way {
+    IN in, sel[3];
+    OUT a, b, c, d, e, f, g, h;
+
+    PARTS:
+
+    Not(in = sel[0], out = NotSel0);
+    Not(in = sel[1], out = NotSel1);
+    Not(in = sel[2], out = NotSel2);
+
+    // a = 
+    And(a = NotSel0, b = NotSel1, out = NotSel0AndNotSel1);
+    And(a = NotSel2, b = NotSel0AndNotSel1, out = NotSel0And1And2);
+    And(a = in, b = NotSel0And1And2, out = a);
+    // b = 
+    And(a = sel[0], b = NotSel1, out = Sel0AndNotSel1);
+    And(a = NotSel2, b = Sel0AndNotSel1, out = NotSel2Sel0AndNotSel1);
+    And(a = in, b = NotSel2Sel0AndNotSel1, out = b);
+    // c = 
+    And(a = sel[1], b = NotSel0, out = Sel1AndNotSel0);
+    And(a = NotSel2, b = Sel1AndNotSel0, out = NotSel2AndSel1AndNotSel0);
+    And(a = in, b = NotSel2AndSel1AndNotSel0, out = c);
+    // d = 
+    And(a = sel[0], b = sel[1], out = Sel0AndSel1);
+    And(a = NotSel2, b = Sel0AndSel1, out = Sel0AndSel1AndNotSel2);
+    And(a = in, b = Sel0AndSel1AndNotSel2, out = d);
+    // e = 
+    And(a = sel[2], b = NotSel0AndNotSel1, out = Sel2AndNotSel1And2);
+    And(a = in, b = Sel2AndNotSel1And2, out = e);
+    // f = 
+    And(a = sel[2], b = Sel0AndNotSel1, out = Sel2AndSel0AndNotSel1);
+    And(a = in, b = Sel2AndSel0AndNotSel1, out = f);
+    //g = 
+    And(a = sel[2], b = Sel1AndNotSel0, out = Sel1And2AndNotSel0);
+    And(a = in, b = Sel1And2AndNotSel0, out = g);
+    //h = 
+    And(a = sel[2], b = Sel0AndSel1, out = Sel0And1And2);
+    And(a = in, b = Sel0And1And2, out = h);
+}
