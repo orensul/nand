@@ -1,0 +1,41 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/RAM64.hdl
+
+/**
+ * Memory of 64 registers, each 16 bit-wide. Out holds the value
+ * stored at the memory location specified by address. If load==1, then 
+ * the in value is loaded into the memory location specified by address 
+ * (the loaded value will be emitted to out from the next time step onward).
+ */
+
+CHIP RAM64 {
+    IN in[16], load, address[6];
+    OUT out[16];
+
+    PARTS:
+    // the last 3 digits of the address points to one of the 8 groups of 8 registers each group
+    // example address == 101101, so we should change in group number 5
+
+    DMux8Way(in = load, sel = address[3..5], a = loadGroupReg1, b = loadGroupReg2, c = loadGroupReg3 , d = loadGroupReg4, e = loadGroupReg5, f = loadGroupReg6, g = loadGroupReg7,
+    h = loadGroupReg8);
+
+    // call RAM8 to change the correct register in the group
+    // we have 8 registers in the group we want to change and according to the
+    // first 3 digits we determine which register to change
+    // we have RAM8 which take care of change one register from 8 according to address
+
+    RAM8(in = in, load = loadGroupReg1, out = outloadGroupReg1, address = address[0..2]);
+    RAM8(in = in, load = loadGroupReg2, out = outloadGroupReg2, address = address[0..2]);
+    RAM8(in = in, load = loadGroupReg3, out = outloadGroupReg3, address = address[0..2]);
+    RAM8(in = in, load = loadGroupReg4, out = outloadGroupReg4, address = address[0..2]);
+    RAM8(in = in, load = loadGroupReg5, out = outloadGroupReg5, address = address[0..2]);
+    RAM8(in = in, load = loadGroupReg6, out = outloadGroupReg6, address = address[0..2]);
+    RAM8(in = in, load = loadGroupReg7, out = outloadGroupReg7, address = address[0..2]);
+    RAM8(in = in, load = loadGroupReg8, out = outloadGroupReg8, address = address[0..2]);
+
+    // Now we want to 
+    Mux8Way16(a = outloadGroupReg1, b = outloadGroupReg2, c = outloadGroupReg3, d = outloadGroupReg4, e = outloadGroupReg5, f = outloadGroupReg6, g = outloadGroupReg7, h = outloadGroupReg8, sel = address[3..5],
+    out = out);
+}

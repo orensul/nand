@@ -1,0 +1,40 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/RAM8.hdl
+
+/**
+ * Memory of 8 registers, each 16 bit-wide. Out holds the value
+ * stored at the memory location specified by address. If load==1, then 
+ * the in value is loaded into the memory location specified by address 
+ * (the loaded value will be emitted to out from the next time step onward).
+ */
+
+CHIP RAM8 {
+    IN in[16], load, address[3];
+    OUT out[16];
+
+    PARTS:
+    // address contains 3 bits so in the range from 000 to 111.
+    // If address == 000 for example and the load === 1 so we want to change the value of
+    // the first register to the value of in, so we will set a to be 1, 
+    // if for example address === 111 so we want to change the value of reg number 8, so we will 
+    // set h to be 1
+
+	DMux8Way(in = load, sel = address, a = loadReg1, b = loadReg2, c = loadReg3, d = loadReg4, e = loadReg5, f = loadReg6, g = loadReg7, h = loadReg8);
+
+	// only one of the loadReg1 to loadReg8 is true, so the value of in will affect only one
+	// of the 8 registers (according to the address)
+	Register(in = in, load = loadReg1, out = outReg1);
+	Register(in = in, load = loadReg2, out = outReg2);
+	Register(in = in, load = loadReg3, out = outReg3);
+	Register(in = in, load = loadReg4, out = outReg4);
+	Register(in = in, load = loadReg5, out = outReg5);
+	Register(in = in, load = loadReg6, out = outReg6);
+	Register(in = in, load = loadReg7, out = outReg7);
+	Register(in = in, load = loadReg8, out = outReg8);
+	
+	// Now we want to set the out the correct output
+	Mux8Way16(a = outReg1, b = outReg2, c = outReg3, d = outReg4, e = outReg5, f = outReg6, g = outReg7, h = outReg8, sel = address, out = out);
+
+}

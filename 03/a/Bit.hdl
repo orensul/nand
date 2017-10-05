@@ -1,0 +1,37 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/Bit.hdl
+
+/**
+ * 1-bit register:
+ * If load[t] == 1 then out[t+1] = in[t]
+ *                 else out does not change (out[t+1] = out[t])
+ */
+
+CHIP Bit {
+    IN in, load;
+    OUT out;
+
+    PARTS:
+    // Here we build a one bit memory by using DFF
+    // Data Flip-flop(DFF): out(t) = in(t-1) 
+    // We should use the DFF like the nand gate - it's given to us
+    // and then, build upon it.
+    // DFF gives the opportunity to remember a bit for one time unit
+    // And, Bit - remember the bit "forever"
+    // How we implement it?
+    // while load == 0 DFF will have the current output like the previous input
+    // So, DFF will output always the same
+    // If load == 1, then the DFF will get as input the value of in,
+    // So, the next output of DFF will be the in
+    // Now load == 1, if we change the in we also change the DFF next output value
+    // If we change the load to 0 so the output of DFF will continue as before, regardless
+    // of changes in the in value
+    // We will use Mux to choose what to do
+    // If load == 1 the MuxOut(which is the input to DFF) will be in
+    // If load == 0 the MuxOut(which is the input to DFF) will be the last DFF output
+    
+    Mux(a = DFFOut, b = in, sel = load, out = MuxOut);
+    DFF(in = MuxOut, out = DFFOut, out = out);
+}
