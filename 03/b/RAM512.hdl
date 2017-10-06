@@ -1,20 +1,3 @@
-// This file is part of the materials accompanying the book 
-// "The Elements of Computing Systems" by Nisan and Schocken, 
-// MIT Press. Book site: www.idc.ac.il/tecs
-// File name: projects/03/b/RAM512.hdl
-
-/**
- * Memory of 512 registers, each 16 bit-wide. Out holds the value
- * stored at the memory location specified by address. If load==1, then 
- * the in value is loaded into the memory location specified by address 
- * (the loaded value will be emitted to out from the next time step onward).
- */
-
-CHIP RAM512 {
-    IN in[16], load, address[9];
-    OUT out[16];
-
-    PARTS:
 	// the address is of 9 bites:
     // the last 3 digits of the address points to one of the 8 groups of 8 registers each group
     // example address == 101101101, so we should change in group number 5, 
@@ -28,17 +11,15 @@ CHIP RAM512 {
     // first 3 digits we determine which register to change
     // we have RAM64 which take care of change one register from 8 according to address
 
-    RAM64(in = in, load = loadGroupReg1, out = outloadGroupReg1, address = address[0..5]);
-    RAM64(in = in, load = loadGroupReg2, out = outloadGroupReg2, address = address[0..5]);
-    RAM64(in = in, load = loadGroupReg3, out = outloadGroupReg3, address = address[0..5]);
-    RAM64(in = in, load = loadGroupReg4, out = outloadGroupReg4, address = address[0..5]);
-    RAM64(in = in, load = loadGroupReg5, out = outloadGroupReg5, address = address[0..5]);
-    RAM64(in = in, load = loadGroupReg6, out = outloadGroupReg6, address = address[0..5]);
-    RAM64(in = in, load = loadGroupReg7, out = outloadGroupReg7, address = address[0..5]);
-    RAM64(in = in, load = loadGroupReg8, out = outloadGroupReg8, address = address[0..5]);
+    RAM64(in = in, load = loadGroupReg1, address = address[0..5], out = outloadGroupReg1);
+    RAM64(in = in, load = loadGroupReg2, address = address[0..5], out = outloadGroupReg2);
+    RAM64(in = in, load = loadGroupReg3, address = address[0..5], out = outloadGroupReg3);
+    RAM64(in = in, load = loadGroupReg4, address = address[0..5], out = outloadGroupReg4);
+    RAM64(in = in, load = loadGroupReg5, address = address[0..5], out = outloadGroupReg5);
+    RAM64(in = in, load = loadGroupReg6, address = address[0..5], out = outloadGroupReg6);
+    RAM64(in = in, load = loadGroupReg7, address = address[0..5], out = outloadGroupReg7);
+    RAM64(in = in, load = loadGroupReg8, address = address[0..5], out = outloadGroupReg8);
 
     // Now we want to 
     Mux8Way16(a = outloadGroupReg1, b = outloadGroupReg2, c = outloadGroupReg3, d = outloadGroupReg4, e = outloadGroupReg5, f = outloadGroupReg6, g = outloadGroupReg7, h = outloadGroupReg8, sel = address[6..8],
     out = out);
-}
-}
