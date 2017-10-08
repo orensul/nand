@@ -17,28 +17,21 @@ CHIP RAM16K {
     PARTS:
 
     // the address is of 14 bites:
-    // the last 3 digits of the address points to one of the 8 groups of 8 registers each group
-    // example address == 101101101101101, so we should change in group number 5, 
+    // the last 2 digits of the address points to one of the 4 groups of 4 registers each group
 
-
-    DMux8Way(in = load, sel = address[11..13], a = loadGroupReg1, b = loadGroupReg2, c = loadGroupReg3 , d = loadGroupReg4, e = loadGroupReg5, f = loadGroupReg6, g = loadGroupReg7,
-    h = loadGroupReg8);
+    DMux4Way(in = load, sel = address[12..13], a = loadGroupReg1, b = loadGroupReg2, c = loadGroupReg3 , d = loadGroupReg4);
 
     // call RAM4K to change the correct register in the group
-    // we have 8 registers in the group we want to change and according to the
-    // first 3 digits we determine which register to change
-    // we have RAM4K which take care of change one register from 8 according to address
+    // we have 4 registers in the group we want to change and according to the
+    // first 2 digits we determine which register to change
+    // we have RAM4K which take care of change one register from 4 according to address
 
-    RAM4K(in = in, load = loadGroupReg1, address = address[0..10], out = outloadGroupReg1);
-    RAM4K(in = in, load = loadGroupReg2, address = address[0..10], out = outloadGroupReg2);
-    RAM4K(in = in, load = loadGroupReg3, address = address[0..10], out = outloadGroupReg3);
-    RAM4K(in = in, load = loadGroupReg4, address = address[0..10], out = outloadGroupReg4);
-    RAM4K(in = in, load = loadGroupReg5, address = address[0..10], out = outloadGroupReg5);
-    RAM4K(in = in, load = loadGroupReg6, address = address[0..10], out = outloadGroupReg6);
-    RAM4K(in = in, load = loadGroupReg7, address = address[0..10], out = outloadGroupReg7);
-    RAM4K(in = in, load = loadGroupReg8, address = address[0..10], out = outloadGroupReg8);
+    RAM4K(in = in, load = loadGroupReg1, address = address[0..11], out = outloadGroupReg1);
+    RAM4K(in = in, load = loadGroupReg2, address = address[0..11], out = outloadGroupReg2);
+    RAM4K(in = in, load = loadGroupReg3, address = address[0..11], out = outloadGroupReg3);
+    RAM4K(in = in, load = loadGroupReg4, address = address[0..11], out = outloadGroupReg4);
 
     // Now we want to 
-    Mux8Way16(a = outloadGroupReg1, b = outloadGroupReg2, c = outloadGroupReg3, d = outloadGroupReg4, e = outloadGroupReg5, f = outloadGroupReg6, g = outloadGroupReg7, h = outloadGroupReg8, sel = address[11..13],
+    Mux4Way16(a = outloadGroupReg1, b = outloadGroupReg2, c = outloadGroupReg3, d = outloadGroupReg4,sel = address[12..13],
     out = out);
 }
