@@ -15,10 +15,15 @@ CHIP PC {
     IN in[16],load,inc,reset;
     OUT out[16];
 
+
     PARTS:
     // if reset is true so the output should be 0
     // if inc is true and load is true the output should be inc of the prev output
     // else (load = 0 or inc = 0) output does not change
     
 
-}
+	Inc16 (in = output1, out = incIn);
+	Mux8Way16 (sel[0]=inc, sel[1] = load, sel[2] = reset , a = output1, b = incIn, c = in, d = in, e = false, f = false, g = false, h = false, out = outMux );
+	Register (in = outMux, load = true, out = out, out = output1);
+	}
+ 
