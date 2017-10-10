@@ -22,8 +22,11 @@ CHIP PC {
     // else (load = 0 or inc = 0) output does not change
     
 
-	Inc16 (in = output1, out = incIn);
-	Mux8Way16 (sel[0]=inc, sel[1] = load, sel[2] = reset , a = output1, b = incIn, c = in, d = in, e = false, f = false, g = false, h = false, out = outMux );
-	Register (in = outMux, load = true, out = out, out = output1);
+	Inc16 (in = output1, out = incIn); 
+	//every letter is another position of the machine sel[0]=inc, sel[1] = load, sel[2] = reset:
+	// a = 000 , b = 110 , b = 100, d = 010
+	// reset state: e = 001,f = 011,g =101, h=111
+	Mux8Way16 (sel[0]=inc, sel[1] = load, sel[2] = reset , a = output1, b = incIn, c = in, d = in, e = false, f = false,g = false, h = false, out = outMux );
+	Register (in = outMux, load = true, out = out, out = output1); \\  output1 save the previous stream of the Register
 	}
  
