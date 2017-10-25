@@ -1,0 +1,132 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],        // M value input  (M = contents of RAM[A])
+        instruction[16],// Instruction for execution
+                        // The compute instruction has the format 111accccccdddjjj. 
+                        // The a- and c-bits instruct the ALU which function to compute, the 
+                        // d-bits instruct where to store the ALU output, and the j-bits 
+                        // specify an optional jump condition.
+        reset;          // Signals whether to re-start the current
+                        // program (reset==1) or continue executing
+                        // the current program (reset==0).
+
+    OUT outM[16],       // M value output
+        writeM,         // Write to M? 
+        addressM[15],   // Address in data memory (of M)
+        pc[15];         // address of next instruction
+
+    PARTS:
+
+    // psuedo code:
+    // if (instruction[15] && instruction[3]) writeM = true
+    // if (instruction[15] && instruction[4]) IsALUOutToDReg = true
+    // if (instruction[15] && instruction[4]) IsALUOutToAReg = true
+    // if (IsALUOutToAReg) ARegInput = ALUOut
+    // else ARegInput = instruction
+    // if (!instruction[15] || IsALUOutToAReg) ShouldLoadToAReg = true
+    // call AReg with (ARegInput, ShouldLoadToAReg)-> out->ARegOut, out[0..14]->addressM
+    // call DReg with (DRegInput, IsALUOutToDReg)-> out->DRegOut
+    // if (instruction[12]) AOrMRegister = ARegOut else AOrMRegister = inM
+    // call ALU with (DRegOut, AOrMRegister, zx,nx,zy,ny,f,no bits of instruction 11..6)
+    // out->outM, out->ALUOut, zr->IsZero, ng->IsNeg
+    // if (instruction[0] && ALUOut IsPos) || (instruction[1] && ALUOut IsZero)
+    // || (instruction[2] && ALUOut IsNeg) jump = true
+    // if (jump && instruction[15]) ShouldLoadToPC = true
+    // call PC with (RegOut, ShouldLoadPC, reset, inc = true) out[0..14]->pc
+
+
+        // Using of Destination Bits
+        // If it's C instruction, ALU output simultnously fed into 3 registers: D-Register, 
+        // A-Register, M-Register. this code decides by the 3 destination bits 
+        // (exm. 000 no container will recive the output, 111 all of them will recive)
+
+        And(a = instruction[15], b = instruction[3], out = writeM);
+        And(a = instruction[15], b = instruction[4], out = IsALUOutToDReg);
+        And(a = instruction[15], b = instruction[5], out = IsALUOutToAReg);
+
+        // choose the input to Register A it can be the ALU output or the instruction
+        // it will be ALU output if it's C instruction and the bit number 5 is 1.
+        Mux16(a = instruction, b = ALUOut, sel = IsALUOutToAReg, out = ARegInput);
+
+        // we have two options in which we should load new value into A Register
+        // 1. It's A Instruction - we should load the instruction
+        // 2. It's C Instruction and bit number 5 in the instruction is 1
+
+        Not(in = instruction[15], out = IsAInstruction);
+        Or(a = IsAInstruction, b = IsALUOutToAReg, out = ShouldLoadToAReg);
+
+        // Load into ARegister the new input or stay with the same value in the register
+        // According to ShouldLoadToAReg
+        ARegister(in = ARegInput, load = ShouldLoadToAReg, out = ARegOut, 
+        out[0..14] = addressM);
+
+        // Now decides if to load into  DRegister
+        DRegister(in = ALUOut, load = IsALUOutToDReg, out = DRegOut);    
+
+ 
+        // determine what will be the input to the ALU
+        // From D register or From A register / M register
+
+        Mux16(a = ARegOut, b = inM, sel = instruction[12], out = AOrMRegister); 
+
+        // Using Control Bits to know which operation ALU should do according to 
+        // 6 bits (also taken from the instruction)
+
+        // Call ALU for calculation
+
+        ALU(x = DRegOut, y = AOrMRegister, zx = instruction[11], nx = instruction[10], 
+        zy = instruction[9], ny = instruction[8], f = instruction[7], no = instruction[6], 
+        out = outM, out = ALUOut, zr = IsZero, ng = IsNeg);
+
+
+        // Program Counter (PC) logic:
+        // if (reset==1) PC = 0
+        // else load = f(jump bits, ALU control outputs)
+        // if (load==1) PC = A
+        // else PC++
+
+        // data of ALU output
+        Or(a = IsZero, b = IsNeg, out = IsNotPos);
+        Not(in = IsNotPos, out = IsPos);
+
+        // data from first 3 bits of the instruction (j bits)
+
+        And(a = instruction[0], b = IsPos, out = JGT); // JGT
+        And(a = instruction[1], b = IsZero, out = JEQ); // JEQ
+        And(a = instruction[2], b = IsNeg, out = JLT); // JLT
+
+        Or(a = JEQ, b = JLT, out = JLE);
+        Or(a = JLE, b = JGT,out = Jump);
+
+        And(a = Jump, b = instruction[15], out = ShouldLoadPC);
+        PC(in = ARegOut, load = ShouldLoadPC, reset = reset, inc = true, 
+            out[0..14] = pc);
+
+}
