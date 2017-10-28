@@ -1,0 +1,21 @@
+orens, shirana
+===============================================================================
+Oren Sultan, ID 201557972, oren.sultan@mail.huji.ac.il
+Shiran Aziz, ID 304813520, shiran.aziz@mail.huji.ac.il
+===============================================================================
+
+                           Project 06: Assembler
+                           ----------------------- 
+  
+
+Submitted Files
+---------------
+README - This file.
+AssemblerMain.py - the main class
+Code.py - Class which is responsible to translates the different parts of dest, comp and jump from assembly to binary
+SymbolTable - Class which is responsible to maintain the symbol table
+Parser - Encapsulates access to the input code. Reads an assembly language command,
+parses it, and provides convenient access to the command’s components
+(fields and symbols). In addition, removes all white space and comments.
+
+
