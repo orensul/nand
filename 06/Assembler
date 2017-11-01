@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# This file assumes that the main is contained in Assembler.py 
+# Obviously, your project may be more complicated and require 
+# a different run file.
+
+python3 Assembler.py ״$1״
+
+

@@ -196,7 +196,7 @@ class Parser:
         self.second_pass()
 
         self.write_output_hack_file()
-        self.print_assembly_binary_lines()
+        #self.print_assembly_binary_lines()
 
     def print_assembly_binary_lines(self):
         """
@@ -215,3 +215,5 @@ class Parser:
         with open(self.output_file_path, 'w') as file_handler:
             for item in self.binary_lines:
                 file_handler.write("{}\n".format(item))
+        # close the output file
+        file_handler.close()
