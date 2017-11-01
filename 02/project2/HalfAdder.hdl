@@ -1,0 +1,27 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/HalfAdder.hdl
+
+/**
+ * Computes the sum of two bits.
+ */
+
+CHIP HalfAdder {
+    IN a, b;    // 1-bit inputs
+    OUT sum,    // Right bit of a + b 
+        carry;  // Left bit of a + b
+
+    PARTS:
+    // a = 1, b = 1 Xor(a,b) = sum = 0 = left bit of a + b
+    //			    And(a,b) = carry = 1 = right bit of a + b
+    // a = 1, b = 0 Xor(a,b) = sum = 1 = left bit of a + b
+    // 				And(a,b) = carry = 0 = right bit of a + b
+    // a = 0, b = 1 Xor(a,b) = sum = 1 = left bit of a + b
+    //				And(a,b) = carry = 0 = right bit of a + b
+    // a = 0, b = 0 Xor(a,b) = sum = 0 = left bit of a + b
+    //				And(a,b) = carry = 0 = right bit of a + b
+
+    Xor(a=a, b=b, out=sum);
+    And(a=a, b=b, out=carry);
+}

@@ -1,0 +1,13 @@
+	
+/**
+ * 16-bit multiply by 2:
+ * out = in*2 = in + in (arithmetic addition)
+ */
+
+CHIP ShiftLeft {
+    IN in[16];
+    OUT out[16];
+
+    PARTS:
+   	Add16(a = in, b = in, out = out);
+}
