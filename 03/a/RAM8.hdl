@@ -18,8 +18,7 @@ CHIP RAM8 {
     // address contains 3 bits so in the range from 000 to 111.
     // If address == 000 for example and the load === 1 so we want to change the value of
     // the first register to the value of in, so we will set a to be 1, 
-    // if for example address === 111 so we want to change the value of reg number 8, so we will 
-    // set h to be 1
+    // if for example address === 111 so we want to change the value of reg number 8, so we // will set h to be 1
 
 	DMux8Way(in = load, sel = address, a = loadReg1, b = loadReg2, c = loadReg3, d = loadReg4, e = loadReg5, f = loadReg6, g = loadReg7, h = loadReg8);
 

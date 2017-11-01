@@ -17,7 +17,7 @@ CHIP RAM16K {
     PARTS:
 
     // the address is of 14 bites:
-    // the last 2 digits of the address points to one of the 4 groups of 4 registers each group
+    // the last 2 digits of the address points to one of the 4 groups of 4 registers each gr
 
     DMux4Way(in = load, sel = address[12..13], a = loadGroupReg1, b = loadGroupReg2, c = loadGroupReg3 , d = loadGroupReg4);
 

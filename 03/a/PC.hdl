@@ -15,18 +15,25 @@ CHIP PC {
     IN in[16],load,inc,reset;
     OUT out[16];
 
-
     PARTS:
+    // Left bit is the boolean for reset (100, 101, 110, 111) -> out[t+1] = 0
+    // Mid bit is the bit of load (010, 011) -> out[t+1] = in[t] - in any case the load bit
+    // is == 1 and the reset bit == 0
+    // Right bit is the bit of inc (001) -> out[t+1] = out[t] + 1 - we will reach this 
+    // else if only if inc bit == 1 and load bit == 0 and of course reset bit == 0
+    // so, only when load is zero(and of course reset is zero) we can increment, because if load // is one we continue with in
+    // Else, (000) -> out[t+1] = out[t] - continue with the same output "forever"
+    // only when all the bits are zero we continue to save the last output
+
     // if reset is true so the output should be 0
     // if inc is true and load is true the output should be inc of the prev output
     // else (load = 0 or inc = 0) output does not change
     
 
-	Inc16 (in = output1, out = incIn); 
-	//every letter is another position of the machine sel[0]=inc, sel[1] = load, sel[2] = reset:
-	// a = 000 , b = 110 , b = 100, d = 010
-	// reset state: e = 001,f = 011,g =101, h=111
-	Mux8Way16 (sel[0]=inc, sel[1] = load, sel[2] = reset , a = output1, b = incIn, c = in, d = in, e = false, f = false,g = false, h = false, out = outMux );
-	Register (in = outMux, load = true, out = out, out = output1); \\  output1 save the previous stream of the Register
-	}
+    Inc16 (in = output1, out = incIn);
+    Mux8Way16 (sel[0]=inc, sel[1] = load, sel[2] = reset , a = output1, b = incIn, c = in, d = in, e = false, f = false, g = false, h = false, out = outMux );
+    Register (in = outMux, load = true, out = out, out = output1);
+    
  
+
+}

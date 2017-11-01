@@ -1,0 +1,28 @@
+orens, shirana
+===============================================================================
+Oren Sultan, ID 201557972, oren.sultan@mail.huji.ac.il
+Shiran Aziz, ID 304813520, shiran.aziz@mail.huji.ac.il
+===============================================================================
+
+                           Project 3 - Sequential Logic
+                           ----------------------- 
+  
+
+Submitted Files
+---------------
+README - This file.
+
+Folder a:
+
+Bit.hdl - 1-bit register:
+PC.hdl - A 16-bit counter with load and reset control bits.
+RAM8.hdl - Memory of 8 registers
+RAM64.hdl - Memory of 64 registers
+Register.hdl - 16-bit register:
+
+Folder b:
+
+RAM4K.hdl - Memory of 4K registers
+RAM16K.hdl - Memory of 16K registers
+RAM512K.hdl - Memory of 512 registers
+ 
