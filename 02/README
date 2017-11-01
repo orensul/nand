@@ -42,7 +42,8 @@ output: 18 - bit, 16- bit the result of the calculation,
 	1- bit if the result came 0, 1-bit if the result is less then 1
 
 ShiftLeft.hdl - 
-Chip, 16-bit multiply by 2
+multiply by 2, makes the LSB zero and makes the bit i+1 to be the bit i
+from i=1 to 14
 input: 16 -bit
 output: 2*in (arithmetic addition)
 
