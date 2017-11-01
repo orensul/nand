@@ -1,134 +1,127 @@
-// Performs a comparison-based sort running at O(n^2)
+// The program input will be at R14 (starting address), R15 (length of array). Don't change these registers.
+// The program should sort the array starting at the address in R14 with length specified in R15.
+// The sort is in descending order - the largest number at the head of the array.
+// The array is allocated in the heap address 2048-16383.
+
+// psuedo code SelectionSort
+// 1. for j from start of array address to end of array address(=start of array address + size)
+//  1.1 largest_index = j
+//  1.2 for i from j+1 to end of array address
+//      1.2.1 if A[i] > A[largest_index]
+//          1.2.1.1 largest_index = i
+//  1.3 SWAP(A[j], A[largest_index])
+
 
 
 (BEGIN)
-    // Init main counter to 0
-    D = 0
-    @16384      
-    D = D - A
-    
-    @limit
-    M = D
-    
-    //@i
-    //M = 0
     @R14
-    D = M
-    @i
-    M = D - 1
+    D=M
 
-(LOOP_MAIN)
-
-    //i++
-    @i
-    M = M + 1
-    // Set c=&arr[0]-1, d=&arr[1]-1
-    //@R14
-    //D = M
-    //@c
-    //M = D
-
-    // reset currentmax to -16383
-    @limit
-    D = M
-    
-    @currentmax
-    M = D
-    
-    // for (i = j...
-    @i
-    D = M
-    
+// j = RAM[14] - 1 = start address of array - 1
     @j
-    M = D
+    M=D-1
 
-    // ...; i <= n; i++)
-    @R14
-    D = M
-    
+// array_boundary = RAM[15]+j = start address of array + size
     @R15
-    D = D + M
-    
-    @endaddr
-    M = D
-    
-    @i
-    //M = M + 1
-    D = M - D //&endaddr - &i
+    D=M+D
+    @array_boundary
+    M=D
 
-    // Go to inner loop
-    @LOOP_INNER
-    D; JLE
+(OUTER_LOOP)
+// j++
+    @j
+    M=M+1
 
-    // if i > n, end loop
+    // jump to END <-> j - array_boundary > 0 <-> j > array_boundary
+    @j
+    D=M
+    @array_boundary
+    D=D-M
     @END
-    D; JGT
+    D;JGT
 
-
-(LOOP_INNER)
-
-    // If at end of array, end current iteration of j inner loop
+// largest_index = j
     @j
-    D = M
-    @endaddr
-    D = M - D // &endaddr - &j
-    // if j > n, inner loop is over
-    @LOOP_MAIN
-    D; JLE
+    D=M
+    @largest_index
+    M=D
 
-    // if arr[c]<arr[d], swap.
-    @currentmax
-    //A = M
-    D = M
+// i = j
     @j
-    A = M
-    D = D - M //currentmax - arr[j] < 0 <==> currentmax < arr[j]
+    D=M
+    @i
+    M=D
+
+(INNER_LOOP)
+// i++
+    @i
+    M=M+1
+
+// jump to SWAP <-> i - array_boundary > 0 <-> i > array_boundary
+    @i
+    D=M
+    @array_boundary
+    D=D-M
     @SWAP
-    D; JLT
-    
-    //j++   
-    @j
-    M = M + 1
-    // Jump back to start of inner loop
-    @LOOP_INNER
-    0; JMP
+    D;JGT
+
+
+
+// jump to UPDATE_LARGEST <-> A[largest_index] - A[i] < 0 <-> A[largest_index] < A[i]
+    // D = A[largest_index]
+    @largest_index
+    A=M
+    D=M
+    // D = A[largest_index] - A[i]
+    @i
+    A=M
+    D=D-M
+    @UPDATE_LARGEST
+    D;JLT
+
+    @INNER_LOOP
+    0;JMP
+
+// psuedo code swap
+// temp = arr[largest_index]
+// arr[largest_index] = arr[j]
+// arr[j] = temp
 
 (SWAP)
-
-    // R0 saves arr[c]
-    @i
-    A = M
-    D = M
+// temp = arr[largest_index]
+    @largest_index
+    A=M
+    D=M
     @temp
-    M = D
-
-    // Put arr[d] instead of arr[c]
+    M=D
+// arr[largest_index] = arr[j]
     @j
-    A = M
-    D = M
-    
-    @i
-    A = M
-    M = D
-    
-    @currentmax
-    M = D
+    A=M
+    D=M
+    @largest_index
+    A=M
+    M=D
 
-    // Put R0 instead of arr[d]
+// arr[j] = temp
     @temp
-    D = M
-    
+    D=M
     @j
-    A = M
-    M = D
-    
-    
-    //j++   
-    @j
-    M = M + 1
-    
-    // Swap done, back to inner loop
-    @LOOP_INNER
-    0; JMP
+    A=M
+    M=D
 
+    @OUTER_LOOP
+    0;JMP
+
+(UPDATE_LARGEST)
+    @i
+    D=M
+    @largest_index
+    M=D
+    @INNER_LOOP
+    0;JMP
+
+// here we end the program by infinite loop - to defense from hackers
 (END)
+    @END
+    0;JMP
+
