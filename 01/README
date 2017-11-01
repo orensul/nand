@@ -11,21 +11,19 @@ Shiran Aziz, ID 304813520, shiran.aziz@mail.huji.ac.il
 Submitted Files
 ---------------
 README - This file.
-Not.hdl
-And.hdl
-Or.hdl
-Xor.hdl
-Mux.hdl
-Dmux.hdl
-Not16.hdl
-And16.hdl
-Or16.hdl
-Mux16.hdl
-Or8Way.hdl
-Mux4Way16.hdl
-Mux8Way16.hdl
-DMux4Way.hdl
-DMux8Way.hdl
-
-
+Not.hdl - negate the input
+And.hdl - return 1 if the two bit input is 1, else return 0.  
+Or.hdl -  return 0 if the two bit input is 0, else return 1.  
+Xor.hdl - return 0 if the two bit input is 1 or 0, else return 1. 
+Mux.hdl - input: a,b, sel. return a if sel is 0, else return b.
+Dmux.hdl - input: in , sel. return (in, 0) if sel is 0 else return (in, 0).
+Not16.hdl - negate the input of 16 bit
+And16.hdl - calculate and of two 16-bit input. 
+Or16.hdl - calculate or of two 16-bit input.
+Mux16.hdl- Mux gate of two 16-bit input. 
+Or8Way.hdl - calculate or on 8 bitinput. 
+Mux4Way16.hdl - Mux gate of four 16-bit input.
+Mux8Way16.hdl - Mux gate of eight 16-bit input.
+DMux4Way.hdl - DMux gate of four 16-bit input.
+DMux8Way.hdl - DMux gate of eight 16-bit input.
 
