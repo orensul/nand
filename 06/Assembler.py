@@ -3,29 +3,47 @@ import sys
 import os
 
 SOURCE_FILE_EXTENSION = ".asm"
+DEST_FILE_EXTENSION = ".hack"
+WRONG_NUMBER_OF_ARGS = "Wrong number of arguments"
+WRONG_EXTENSION = "The program supports only .asm extension"
+PATH_DOESNT_EXIST = "The input path to the program does not exist"
+
 
 class Assembler:
-    def __init__(self, path, is_folder):
-        if is_folder:
-            for file_name in os.listdir(path):
-                print(file_name)
-                print(path)
-                if file_name.endswith(SOURCE_FILE_EXTENSION):
-                    Parser.Parser(path, "/" + file_name)
+    """
+    Main class which is responsible to drives the program
+    """
+
+    def main():
+        num_of_args = len(sys.argv)
+        input = sys.argv[1]
+
+        # check if path is given as argument or too much arguments
+        if num_of_args == 1 or num_of_args > 2:
+            print(WRONG_NUMBER_OF_ARGS)
+
         else:
-            file_name = os.path.split(path)[1]
-            path = os.path.split(path)[0] + "/"
-            Parser.Parser(path, file_name)
+            # make it absolute path anyway
+            abs_path = os.path.abspath(input)
 
-def main():
-    abs_path = os.path.abspath(sys.argv[1])
-    if abs_path.endswith(SOURCE_FILE_EXTENSION):
-        Assembler(abs_path, False)
-    else:
-        Assembler(abs_path, True)
+            # check if path exists and it's a directory
+            if os.path.isdir(os.path.join(input)):
+                for file_name in os.listdir(abs_path):
+                    if file_name.endswith(SOURCE_FILE_EXTENSION):
+                        Parser.Parser(abs_path, "/" + file_name)
+            # check if there is a regular file with that name
+            elif os.path.exists(os.path.join(input)):
+                file_name = os.path.split(abs_path)[1]
+                path = os.path.split(abs_path)[0] + "/"
+                if file_name.endswith(SOURCE_FILE_EXTENSION):
+                    Parser.Parser(path, file_name)
+                else:
+                    print(WRONG_EXTENSION)
 
+            # otherwise, the input path to the program does not exist
+            else:
+                print(PATH_DOESNT_EXIST)
 
-
-if __name__ == "__main__":
-    main()
+    if __name__ == "__main__":
+        main()
 

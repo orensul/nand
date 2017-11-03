@@ -1,10 +1,16 @@
 class Code:
+    """
+    This class Translates Hack assembly language mnemonics into binary codes.
+    """
     def __init__(self):
-         # Predefined symbols
-         self._dest_table = {'null': '000', 'M' : '001', 'D' : '010', 'MD' : '011',
+        """
+        Initialize the _dest_table, _comp_table and _jump_table dictionaries.
+        :return:
+        """
+        self._dest_table = {'null': '000', 'M' : '001', 'D' : '010', 'MD' : '011',
                        'A': '100','AM': '101', 'AD': '110', 'AMD': '111'}
 
-         self._comp_table = {'0': '1110101010', '1': '1110111111', '-1': '1110111010',
+        self._comp_table = {'0': '1110101010', '1': '1110111111', '-1': '1110111010',
                        'D': '1110001100', 'A': '1110110000', 'M':'1111110000',
                        '!D': '1110001101', '!A': '1110110001','!M':'1111110001',
                        '-D': '1110001111', '-A': '1110110011', '-M':'1111110011',
@@ -18,33 +24,27 @@ class Code:
                         'A>>': '1010000000', 'A<<': '1010100000', 'M>>': '1011000000',
                         'M<<': '1011100000'}
 
-
-         self._jump_table = {'null' : '000', 'JGT': '001', 'JEQ' : '010', 'JGE': '011'
+        self._jump_table = {'null' : '000', 'JGT': '001', 'JEQ' : '010', 'JGE': '011'
          , 'JLT': '100', 'JNE': '101', 'JLE': '110', 'JMP': '111'}
-
 
     def dest(self, mnemonic):
         """
-        :param self:
-        :param mnemonic:
-        :return:
+        This method gets the mnemonic(string) of dest and returns the value in the
+        dest dictionary.
         """
         return self._dest_table.get(mnemonic)
 
-
     def comp(self, mnemonic):
         """
-        :param self:
-        :param mnemonic:
-        :return:
+        This method gets the mnemonic(string) of comp and returns the value in the
+        comp dictionary.
         """
         return self._comp_table.get(mnemonic)
 
     def jump(self, mnemonic):
         """
-        :param self:
-        :param mnemonic:
-        :return:
+        This method gets the mnemonic(string) of jump and returns the value in the
+        jump dictionary.
         """
         return self._jump_table.get(mnemonic)
 

@@ -1,9 +1,15 @@
 import SymbolTable
 import Code
 import re
+import Assembler
 
 
 class Parser:
+    """
+        Encapsulates access to the input code. Reads an assembly language command,
+        parses it, and provides convenient access to the commands components
+        (fields and symbols). In addition, removes all white space and comments.
+    """
 
     COMMENT = "//"
     A_TAG = '@'
@@ -21,7 +27,8 @@ class Parser:
         # initialize the class variables
         self.n = 16
         self.file_path = folder_path + file_name
-        self.output_file_path = folder_path + file_name.replace('.asm', '.hack')
+        self.output_file_path = folder_path + file_name.replace \
+            (Assembler.SOURCE_FILE_EXTENSION, Assembler.DEST_FILE_EXTENSION)
         self.curr_instruction = ""
         self.curr_instruction_num = -1
         self.assembly_lines = []

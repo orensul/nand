@@ -1,5 +1,12 @@
 class SymbolTable:
+    """
+    This class Keeps a correspondence between symbolic labels and numeric addresses.
+    """
     def __init__(self):
+        """
+        Initialize the _symbols_table dictionary
+        :return:
+        """
         # Predefined symbols
         self._symbols_table = {'R0': 0, 'R1': 1, 'R2': 2, 'R3': 3, 'R4': 4,
                                'R5': 5, 'R6': 6, 'R7': 7, 'R8': 8, 'R9': 9,
@@ -34,6 +41,10 @@ class SymbolTable:
         return self._symbols_table[symbol]
 
     def print_symbols_table(self):
+        """
+        This method prints the symbol table
+        :return:
+        """
         for symbol, value in self._symbols_table.items():
-            print("Key: " + symbol +"\n" + "Value: " + str(value) + "\n")
+            print("Key: " + symbol + "\n" + "Value: " + str(value) + "\n")
 
