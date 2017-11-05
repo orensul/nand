@@ -8,17 +8,11 @@ D = M
 M = D
 @i
 M = -1
-
 (Init_Loop)
 	@y
 	D = M
-	@z
-	M = D
 	@x
-	D = M
-	@z
-	M = M - D
-	D = M
+	D=D-M
 	@End_LOOP
 	D;JLT
 	@i
@@ -26,7 +20,7 @@ M = -1
 	@x
 	M = M<<
 	@Init_Loop
-	0;JEQ
+	0;JMP
 
 (End_LOOP)
 @x
@@ -35,24 +29,17 @@ M = M>>
 M=0
 @i
 D = M 
-@Main_Loop
+@End
 D+1;JEQ
-
-
 (Main_Loop)
 	@i
-	M=D
+	D=M
 	@End
 	D;JLT
 	@y
 	D = M
-	@z
-	M = D
 	@x
-	D = M
-	@z
-	M = M - D
-	D = M
+	D=D-M
 	@Condition
 	D;JGE
 	(Main_Loop_Continue)
@@ -61,10 +48,7 @@ D+1;JEQ
 	@i
 	M = M - 1
 	@Main_Loop
-	0;JEQ
-
-	
-	
+	0;JMP	
 (Condition)
 	@i
 	D = M
@@ -82,7 +66,7 @@ D+1;JEQ
 	@j
 	M = M - 1
 	@calc_part_of_the result
-	0;JEQ
+	0;JMP
 	(add_part_result)
 	@part
 	D = M
@@ -93,6 +77,5 @@ D+1;JEQ
 	@y
 	M = M - D
 	@Main_Loop_Continue
-	0;JEQ
-
+	0;JMP
 (End)
