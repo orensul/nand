@@ -3,7 +3,14 @@ import Code
 import re
 import Assembler
 
-
+# Constants
+COMMENT = "//"
+A_TAG = '@'
+LABEL_BEGIN = '('
+LABEL_END = ')'
+A_INSTRUCTION = 0
+C_INSTRUCTION = 1
+L_INSTRUCTION = 2
 class Parser:
     """
         Encapsulates access to the input code. Reads an assembly language command,
@@ -11,13 +18,7 @@ class Parser:
         (fields and symbols). In addition, removes all white space and comments.
     """
 
-    COMMENT = "//"
-    A_TAG = '@'
-    LABEL_BEGIN = '('
-    LABEL_END = ')'
-    A_INSTRUCTION = 0
-    C_INSTRUCTION = 1
-    L_INSTRUCTION = 2
+
 
     def __init__(self, folder_path, file_name):
         # construct an empty symbol table with the predefined symbols
@@ -45,13 +46,13 @@ class Parser:
         instruction type
         :return:
         """
-        if self.curr_instruction.startswith(self.A_TAG):
-            return self.A_INSTRUCTION
-        if self.curr_instruction.startswith(self.LABEL_BEGIN) and \
-                self.curr_instruction.endswith(self.LABEL_END):
-            return self.L_INSTRUCTION
+        if self.curr_instruction.startswith(A_TAG):
+            return A_INSTRUCTION
+        if self.curr_instruction.startswith(LABEL_BEGIN) and \
+                self.curr_instruction.endswith(LABEL_END):
+            return L_INSTRUCTION
 
-        return self.C_INSTRUCTION
+        return C_INSTRUCTION
 
     def read_file(self, file_path):
         # open the input asm file for reading
@@ -62,11 +63,11 @@ class Parser:
             line = line.strip()
             # if there is a comment in the line we will take the string from
             # the beginning of the line to the comment (without the comment)
-            if self.COMMENT in line:
-                line = line.split(self.COMMENT)[0].strip()
+            if COMMENT in line:
+                line = line.split(COMMENT)[0].strip()
             # if the line is not empty and is not a comment line we will add
             # this line to our assembly_lines list
-            if not line.startswith(self.COMMENT) and line:
+            if not line.startswith(COMMENT) and line:
                 self.assembly_lines.append(line)
 
     def print_binary_lines(self):
@@ -156,7 +157,7 @@ class Parser:
         :return:
         """
         self.curr_instruction = instruction
-        if not self.instruction_type() == self.L_INSTRUCTION:
+        if not self.instruction_type() == L_INSTRUCTION:
             self.curr_instruction_num += 1
 
     def first_pass(self):
@@ -172,7 +173,7 @@ class Parser:
             # the curr_command_num counter
             self.advance(instruction)
             # check if the instruction type if label
-            if self.instruction_type() == self.L_INSTRUCTION:
+            if self.instruction_type() == L_INSTRUCTION:
                 self.handle_l_instruction()
 
     def second_pass(self):
@@ -188,9 +189,9 @@ class Parser:
             # the curr_command_num counter
             self.advance(instruction)
             # check if the instruction is A type or C type and handle the instruction
-            if self.instruction_type() == self.A_INSTRUCTION:
+            if self.instruction_type() == A_INSTRUCTION:
                 self.handle_a_instruction()
-            elif self.instruction_type() == self.C_INSTRUCTION:
+            elif self.instruction_type() == C_INSTRUCTION:
                 self.handle_c_instruction(self.curr_instruction)
 
     def assemble(self):
