@@ -21,9 +21,10 @@
     @j
     M=D-1
 
-// array_boundary = RAM[15]+j = start address of array + size
+// array_boundary = RAM[15]+j - 1 = start address of array + size - 1
     @R15
     D=M+D
+    D=D-1
     @array_boundary
     M=D
 
@@ -119,9 +120,3 @@
     M=D
     @INNER_LOOP
     0;JMP
-
-// here we end the program by infinite loop - to defense from hackers
-(END)
-    @END
-    0;JMP
-

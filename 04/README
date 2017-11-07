@@ -1,0 +1,27 @@
+orens, shirana
+===============================================================================
+Oren Sultan, ID 201557972, oren.sultan@mail.huji.ac.il
+Shiran Aziz, ID 304813520, shiran.aziz@mail.huji.ac.il
+===============================================================================
+
+                           Project 3 - Machine Language
+                           ----------------------- 
+  
+
+Submitted Files
+---------------
+README - This file.
+
+Folder: fill
+Files: Fill.asm - Runs an infinite loop that listens to the keyboard input.
+When a key is pressed (any key), the program blackens the screen,
+i.e. writes "black" in every pixel.
+ 
+Folder: mult
+Files: mult.asm - Multiplies R0 and R1 and stores the result in R2.
+
+Folder: sort
+Files: Sort.asm - Sort Array in Descending order
+
+Folder: divide
+Files: Divide.asm - Divide two numbers in R13 and R14, result will be in R15

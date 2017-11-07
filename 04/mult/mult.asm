@@ -54,9 +54,6 @@ M=D
 // jump to LOOP label again
 	@LOOP
 	0;JMP
-// here we end the program by infinite loop - to defense from hackers
-(END)
-	@END
-	0;JMP
+
 
 
