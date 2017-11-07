@@ -26,17 +26,12 @@ CHIP ExtendAlu{
 
     
     // Change the result of ALU or it remains the same according to instruction[7..8]     
-    Mux4Way16(a = outMul ,b = outMul ,c = shiftOut ,d = ALUOut , sel = instruction[7..8], out = out, out[15]=ng,
-    out = ResultOut);
-
-
+    Mux4Way16(a = outMul ,b = outMul ,c = shiftOut ,d = ALUOut , sel = instruction[7..8], out[15] = ng, 
+    out = ResultOut, out = out);
 
     
     // check if Resultout != 0, if so zr = false
     Or8Way(in = ResultOut[0..7], out = OrFirst8Bits);
-    Or8Way(in = ResultOut[8..15], out = OrLast8Bits);
-    Or(a = OrFirst8Bits, b = OrLast8Bits, out = isZero);
-    Not(in = isZero, out = zr);
 
 
              

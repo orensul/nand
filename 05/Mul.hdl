@@ -1,0 +1,82 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/Adder16.hdl
+
+/**
+ * Multeply two 16-bit values.
+ */
+
+CHIP Mul {
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+    //if b[i] = 1 
+    //  add ShiftLeft a 
+    //if  b[i] = 0 
+    //  add ShiftLeft 0=false 
+    
+    Mux16(a=false, b=a , sel = b[0],out = outmul);
+    
+    ShiftLeft(in=a, out=outshift1);
+    Mux16(a=false, b=outshift1 , sel = b[1] ,out = outmul1);
+    Add16(a=outmul1, b=outmul, out = outadd2);
+    
+    ShiftLeft(in=outshift1, out=outshift2);
+    Mux16(a=false, b=outshift2 , sel = b[2] ,out = outmul2);
+    Add16(a=outmul2, b=outadd2, out = outadd3);
+    
+    ShiftLeft(in=outshift2, out=outshift3);
+    Mux16(a=false, b=outshift3 , sel = b[3] ,out = outmul3);
+    Add16(a=outmul3, b=outadd3, out = outadd4);
+    
+    ShiftLeft(in=outshift3, out=outshift4);
+    Mux16(a=false, b=outshift4 , sel = b[4] ,out = outmul4);
+    Add16(a=outmul4, b=outadd4, out = outadd5);
+    
+    ShiftLeft(in=outshift4, out=outshift5);
+    Mux16(a=false, b=outshift5, sel = b[5] ,out = outmul5);
+    Add16(a=outmul5, b=outadd5, out = outadd6);
+    
+    ShiftLeft(in=outshift5, out=outshift6);
+    Mux16(a=false, b=outshift6 , sel = b[6] ,out = outmul6);
+    Add16(a=outmul6, b=outadd6, out = outadd7);
+    
+    ShiftLeft(in=outshift6, out=outshift7);
+    Mux16(a=false, b=outshift7 , sel = b[7] ,out = outmul7);
+    Add16(a=outmul7, b=outadd7, out = outadd8 );    
+    
+    ShiftLeft(in=outshift7, out=outshift8);
+    Mux16(a=false, b=outshift8 ,sel = b[8] ,out = outmul8);
+    Add16(a=outmul8, b=outadd8, out = outadd9); 
+    
+    ShiftLeft(in=outshift8, out=outshift9);
+    Mux16(a=false, b=outshift9 , sel = b[9] ,out = outmul9);
+    Add16(a=outmul9, b=outadd9, out = outadd10);    
+    
+    ShiftLeft(in=outshift9, out=outshift10);
+    Mux16(a=false, b=outshift10, sel = b[10] ,out = outmul10);
+    Add16(a=outmul10, b=outadd10, out = outadd11);  
+    
+    ShiftLeft(in=outshift10, out=outshift11);
+    Mux16(a=false, b=outshift11 , sel = b[11] ,out = outmul11);
+    Add16(a=outmul11, b=outadd11, out = outadd12);
+    
+    ShiftLeft(in=outshift11, out=outshift12);
+    Mux16(a=false, b=outshift12 , sel = b[12] ,out = outmul12);
+    Add16(a=outmul12, b=outadd12, out = outadd13);
+    
+    ShiftLeft(in=outshift12, out=outshift13);
+    Mux16(a=false, b=outshift13 , sel = b[13] ,out = outmul13);
+    Add16(a=outmul13, b=outadd13, out = outadd14);
+    
+    ShiftLeft(in=outshift13, out=outshift14);
+    Mux16(a=false, b=outshift14 , sel = b[14] ,out = outmul14);
+    Add16(a=outmul14, b=outadd14, out = outadd15);
+    
+    ShiftLeft(in=outshift14, out=outshift15);
+    Mux16(a=false, b=outshift15 , sel = b[15] ,out = outmul15);
+    Add16(a=outmul15, b=outadd15, out = out);   
+
+}
