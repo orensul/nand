@@ -22,17 +22,20 @@ CHIP ExtendAlu{
     // Call ALU 
     ALU(x = x, y = y, zx = instruction[5], nx = instruction[4], 
        zy = instruction[3], ny = instruction[2], f = instruction[1], no = instruction[0], 
-       out = ALUOut, zr = zr, ng = ng);
+       out = ALUOut, zr = zer, ng = neg);
 
     
     // Change the result of ALU or it remains the same according to instruction[7..8]     
-    Mux4Way16(a = outMul ,b = outMul ,c = shiftOut ,d = ALUOut , sel = instruction[7..8], out[15] = ng, 
-    out = ResultOut, out = out);
+    Mux4Way16(a = outMul ,b = outMul ,c = shiftOut ,d = ALUOut , sel = instruction[7..8], out = out, out[0..7]=zer1, out[8..15]=zer2, out[15] = ng);
 
     
     // check if Resultout != 0, if so zr = false
-    Or8Way(in = ResultOut[0..7], out = OrFirst8Bits);
-
+    Or8Way(in = zer1, out = First8Bits);
+    Or8Way(in = zer2, out = Last8Bits);
+    Or(a = First8Bits, b = Last8Bits, out = isZero);
+    Not(in = isZero, out = zr);
+        
+    
 
              
 }
