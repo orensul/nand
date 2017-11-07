@@ -1,0 +1,43 @@
+                 
+CHIP ExtendAlu{
+    IN x[16],y[16],instruction[9];
+    OUT out[16], 
+        zr, // 1 if (out == 0), 0 otherwise
+        ng;// 1 if (out < 0),  0 otherwise
+     
+    PARTS:
+    
+    // calc the multiplication of x,y
+    Mul(a = x, b = y, out = outMul);
+
+
+    ShiftLeft(in = x , out = xshiftLeft);
+    ShiftLeft(in = y , out = yshiftLeft);
+    ShiftRight(in = x , out = xshiftRight);
+    ShiftRight(in = y , out = yshiftRight);
+    
+    // choose the correct shift command based on instruction[4..5]      
+    Mux4Way16(a = yshiftRight,b = yshiftLeft ,c = xshiftRight ,d = xshiftLeft , sel = instruction[4..5], out = shiftOut);
+    
+    // Call ALU 
+    ALU(x = x, y = y, zx = instruction[5], nx = instruction[4], 
+       zy = instruction[3], ny = instruction[2], f = instruction[1], no = instruction[0], 
+       out = ALUOut, zr = zr, ng = ng);
+
+    
+    // Change the result of ALU or it remains the same according to instruction[7..8]     
+    Mux4Way16(a = outMul ,b = outMul ,c = shiftOut ,d = ALUOut , sel = instruction[7..8], out = out, out[15]=ng,
+    out = ResultOut);
+
+
+
+    
+    // check if Resultout != 0, if so zr = false
+    Or8Way(in = ResultOut[0..7], out = OrFirst8Bits);
+    Or8Way(in = ResultOut[8..15], out = OrLast8Bits);
+    Or(a = OrFirst8Bits, b = OrLast8Bits, out = isZero);
+    Not(in = isZero, out = zr);
+
+
+             
+}
