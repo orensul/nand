@@ -87,11 +87,12 @@ class CodeWriter:
     def init_sp(self):
         """
         This method is responsible to initialize RAM[0] with SP_START_ADDRESS (= 256)
+        RAM[1] with LCL_START_ADDRESS
         """
         self.append_address(SP_START_ADDRESS)
-        self.append_comp_f('D', 'A')
+        self.change('D', 'A')
         self.append_address(self._register.get('SP'))
-        self.append_comp_f('M', 'D')
+        self.change('M', 'D')
 
     #def set_file_name(self, file_name):
     #    self._vm_file = file_name
@@ -106,8 +107,11 @@ class CodeWriter:
         if segment == self._segment.get('CONST'):
             self.append_address(index)
             self.asm_lines.append("D=A")
+            self.push('D')
+        if segment == self._segment.get('LOCAL'):
+            self.append_address(index)
+            self.asm_lines.append("D=A")
 
-        self.push('D')
 
     def write_arithmetic(self, command):
         """
@@ -122,18 +126,18 @@ class CodeWriter:
             self.dec_sp()
             self.pop('D')
             self.peek('A')
-            self.append_comp_f('D', 'A' + operation + 'D')
+            self.change('D', 'A' + operation + 'D')
             self.push('D')
         elif command == 'neg' or command == 'not':
             self.dec_sp()
             self.peek('D')
-            self.append_comp_f('D', operation + 'D')
+            self.change('D', operation + 'D')
             self.push('D')
         elif command == 'lt' or command == 'gt' or command == 'eq':
             self.dec_sp()
             self.pop('D')
             self.peek('A')
-            self.append_comp_f('D', 'A-D')
+            self.change('D', 'A-D')
 
             # it's important to add the _label_num to the label name, otherwise, if we
             # have several eq_label for example, it will jump to the last of them which
@@ -194,22 +198,13 @@ class CodeWriter:
         """
         self.asm_lines.append('@' + address)
 
-    def append_comp_f(self, dest, comp, jump = None):
-        """ Writes into the asm_lines list the comp command(dest=comp;jump)
+    def change(self, dest, comp):
+        """ Writes into the asm_lines list the comp command(dest=comp)
         :param dest:
         :param comp:
-        :param jump:
         """
-        asm_line = ""
-        # dest is optional, we should check if dest is not None
-        if dest:
-            asm_line = dest + '='
-        # comp is mandatory, so we append the comp
-        asm_line += comp
-        # jump is optional, we should check if jump is not None
-        if jump:
-            asm_line += ';' + jump
-        self.asm_lines.append(asm_line)
+        self.asm_lines.append(dest + '=' + comp)
+
 
     def write_output_asm_file(self):
         """ This method is responsible to write the asm_list into the output file
@@ -228,14 +223,14 @@ class CodeWriter:
         following asm command: @SP M=M+1
         """
         self.append_address('SP')
-        self.append_comp_f('M', 'M+1')
+        self.change('M', 'M+1')
 
     def dec_sp(self):
         """ Decrease the SP in order to access the item in top of the stack by the
         following asm command: @SP M=M-1
         """
         self.append_address('SP')
-        self.append_comp_f('M', 'M-1')
+        self.change('M', 'M-1')
 
     def peek(self, dest):
         """ This method implements the peek from stack functionality(in peek we dont
@@ -247,8 +242,8 @@ class CodeWriter:
         :param dest: dest part(D for example)
         """
         self.append_address('SP')
-        self.append_comp_f('A', 'M')
-        self.append_comp_f(dest, 'M')
+        self.change('A', 'M')
+        self.change(dest, 'M')
 
     def pop(self, dest):
         """ Pop is like peek but also remove the item in the top of the stack by decrease
@@ -270,8 +265,8 @@ class CodeWriter:
         :param comp: the comp part
         """
         self.append_address('SP')
-        self.append_comp_f('A', 'M')
-        self.append_comp_f('M', comp)
+        self.change('A', 'M')
+        self.change('M', comp)
         self.inc_sp()
 
     def print_asm_lines(self):
