@@ -5,13 +5,15 @@ SP_START_ADDRESS = '256'
 C_ARITHMETIC = 0
 C_PUSH = 1
 C_POP = 2
-C_LABEL = 3
-C_GO_TO = 4
-C_IF = 5
-C_FUNCTION = 6
-C_RETURN = 7
-C_CALL = 8
-C_ERROR = 9
+LCL = 'local'
+ARG = 'argument'
+THIS = 'this'
+THAT = 'that'
+PTR = 'pointer'
+TEMP = 'temp'
+CONST = 'constant'
+STATIC = 'static'
+REG = 'reg'
 
 
 class CodeWriter:
@@ -26,49 +28,40 @@ class CodeWriter:
         self._arithmetic_name.update({'add': '+', 'sub': '-', 'or': '|', 'and': '&',
                                       'neg': '-', 'not': '!', 'eq': 'JEQ', 'gt': 'JGT',
                                       'lt': 'JLT'})
-        # command names:
-        self._command_name = dict()
-        self._command_name.update({'POP': 'pop', 'PUSH': 'push'})
-
         # commands:
         self._command_type = dict()
-        self._command_type.update({'C_ARITHMETIC': 0, 'C_PUSH': 1, 'C_POP': 2,
-                                   'C_LABEL': 3,
-                            'C_GOTO': 4,'C_IF': 5, 'C_FUNCTION': 6, 'C_RETURN': 7,
-                            'C_CALL': 8,'C_ERROR': 9})
+        self._command_type.update({'C_ARITHMETIC': 0, 'C_PUSH': 1, 'C_POP': 2})
 
         # command type-name mapping:
         self._command_mapping = dict()
         self._command_mapping.update({'add': 'C_ARITHMETIC', 'sub': 'C_ARITHMETIC',
-                            'neg': 'C_ARITHMETIC', 'eq': 'C_ARITHMETIC',
-                            'gt' : 'C_ARITHMETIC', 'lt': 'C_ARITHMETIC',
-                            'and': 'C_ARITHMETIC', 'or': 'C_ARITHMETIC',
-                            'not': 'C_ARITHMETIC', 'label': 'C_LABEL',
-                            'goto': 'C_GOTO', 'if-goto': 'C_IF',
-                            'push': 'C_PUSH', 'pop': 'C_POP',
-                            'call': 'C_CALL', 'return': 'C_RETURN',
-                            'function': 'C_FUNCTION'})
-
+                                      'neg': 'C_ARITHMETIC', 'eq': 'C_ARITHMETIC',
+                                      'gt': 'C_ARITHMETIC', 'lt': 'C_ARITHMETIC',
+                                      'and': 'C_ARITHMETIC', 'or': 'C_ARITHMETIC',
+                                      'not': 'C_ARITHMETIC', 'push': 'C_PUSH',
+                                      'pop': 'C_POP'})
         # segments
         self._segment = dict()
-        self._segment.update({'LCL': 'local', 'ARG': 'argument', 'THIS': 'that',
-                        'PTR': 'pointer', 'TEMP': 'temp', 'CONST': 'constant',
-                        'STATIC': 'static', 'REG': 'reg'})
+        self._segment.update({'local': 'LCL', 'argument': 'ARG', 'this': 'THIS',
+                              'that': 'THAT', 'pointer': 'PTR', 'temp': 'TEMP',
+                              'constant': 'CONST', 'static': 'STATIC', 'reg': 'REG'})
 
         # registers
         self._register = dict()
-        self._register.update({'SP': 'R0', 'LCL': 'R1', 'ARG': 'R2', 'THIS': 'R3',
-                               'THAT': 'R4'})
+        self._register.update({'SP': 'R0', 'local': 'R1', 'argument': 'R2',
+                               'this': 'R3', 'that': 'R4', 'temp': 'R5',
+                               'pointer': 'R3', 'REG_COPY': 'R13'})
 
         # prepare the output asm file to be ready to be written
         self._asm_file = open(asm_file, 'w')
-        # list which will hold the lines in the output asm file
-        self.asm_lines = []
 
-        #self._vm_file = ''
+        # list which will hold the lines in the output asm file
+        self._asm_lines = []
+
         # we save the number of the label we will generate so it will makes the labels
         # with different names.
         self._label_num = 0
+
         # initialize the Stack pointer to start from 256
         self.init_sp()
 
@@ -87,36 +80,17 @@ class CodeWriter:
     def init_sp(self):
         """
         This method is responsible to initialize RAM[0] with SP_START_ADDRESS (= 256)
-        RAM[1] with LCL_START_ADDRESS
         """
         self.append_address(SP_START_ADDRESS)
         self.change('D', 'A')
         self.append_address(self._register.get('SP'))
         self.change('M', 'D')
 
-    #def set_file_name(self, file_name):
-    #    self._vm_file = file_name
-
-    def write_push(self, segment, index):
-        """
-        This Method is responsible to handle the different types of the segments in the
-        command (exmaple: const, local and so on)
-        :param segment: the name of the segment to push into
-        :param index: the number of the command "PUSH segment_name number"
-        """
-        if segment == self._segment.get('CONST'):
-            self.append_address(index)
-            self.asm_lines.append("D=A")
-            self.push('D')
-        if segment == self._segment.get('LOCAL'):
-            self.append_address(index)
-            self.asm_lines.append("D=A")
-
-
     def write_arithmetic(self, command):
         """
         This Method is responsible to translate given arithmetic command to the asm
         suitable command.
+        :param command: command
         """
         # extract the correct operation according to the arithmetic from the dictionary
         # (for example add is "+")
@@ -161,7 +135,7 @@ class CodeWriter:
         """ Adds to the asm_lines list a line of label declaration (Label_name)
             :param label_name: the name of the label
         """
-        self.asm_lines.append(LABEL_BEGIN + label_name + LABEL_END)
+        self._asm_lines.append(LABEL_BEGIN + label_name + LABEL_END)
 
     def append_conditional_jump(self, input_to_jump_command, condition):
 
@@ -169,14 +143,14 @@ class CodeWriter:
             :param input_to_jump_command:
             :param condition: condition of the jump for example JEQ
         """
-        self.asm_lines.append(input_to_jump_command + ";" + condition)
+        self._asm_lines.append(input_to_jump_command + ";" + condition)
 
     def append_jump(self, label_name):
         """ Adds to the asm_lines list the two lines of jump without condition to label
             :param label_name: name of the label we enforce jump to
         """
         self.append_address(label_name)
-        self.asm_lines.append('0;JMP')
+        self._asm_lines.append('0;JMP')
 
     def append_jump_to_label(self, label_name, condition):
         """ Adds to the asm_lines list the two lines of jump with a condition
@@ -186,30 +160,119 @@ class CodeWriter:
         self.append_address(label_name)
         self.append_conditional_jump('D', condition)
 
+    def calc_segment_pointer_plus_offset_address(self, segment, index, register):
+        """
+        This method puts in A the address of segmentPointer + index
+        :param segment: the name of the segment from the line in the vm file
+        :param index: the numerical part of the command
+        :param register: A or D (address or data)
+        """
+        # A = address = segmentPointer + i
+        self.append_address(index)
+        self.change('D', 'A')
+        self.append_address(segment)
+        self.change('A', '' + register + '+D')
+
+    def push_constant_segment(self, index):
+        """
+        This method do the following: *SP=index
+        :param index: the numerical part of constant command
+        """
+        self.append_address(index)
+        self.change('D', 'A')
+        self.push('D')
+
+    def push_register_or_memory_segment(self, segment, index, register):
+        """
+        This method is responsible to translate push segment i
+        segment can be one of the following: LCL,AEG,THIS,THAT,TEMP,PTR
+        :param segment: the name of the segment from the line in vm file
+        :param index: the numerical part of the command
+        :param register: A or D
+        """
+        self.calc_segment_pointer_plus_offset_address(segment, index, register)
+        self.change('D', 'M')
+        # D = *(segmentPointer + i) = *addr
+        # *SP = *addr, SP++
+        self.push('D')
+
+    def pop_register_or_memory_segment(self, segment, index, register):
+        """
+        This method is responsible to translate pop segment i
+        segment can be one of the following:  LCL,AEG,THIS,THAT,TEMP,PTR
+        :param segment: the name of the segment from the line in vm file
+        :param index: the numerical part of the command
+        :param register: A or D
+        """
+        # *R13=addr=segmentPointer+i
+        self.calc_segment_pointer_plus_offset_address(segment, index, register)
+        self.change('D', 'A')
+        self.append_address(self._register.get('REG_COPY'))
+        self.change('M', 'D')
+        # D=*SP, SP--
+        self.dec_sp()
+        self.peek('D')
+        # A=addr
+        self.append_address(self._register.get('REG_COPY'))
+        self.change('A', 'M')
+        # *addr = D = *SP
+        self.change('M', 'D')
+
     def write_push_pop(self, command, segment, index):
         """
-        Writes the assembly code that is the translation of the given arithmetic command
+        Writes the assembly code that is the translation of the given command, where
+        command is either C_PUSH or C_POP.
         """
+        if command == C_PUSH:
+            # it's a PUSH command,
+            # check if the segment is memory segment(LCL,ARG,THIS,THAT) or
+            # register segment(TEMP,POINTER) or
+            # CONSTANT segment
+            # STATIC
+            if segment == CONST:
+                self.push_constant_segment(index)
+            elif segment in (LCL, ARG, THIS, THAT):
+                self.push_register_or_memory_segment(self._segment.get(segment), index,
+                                                     'M')
+            elif segment in (TEMP, PTR):
+                self.push_register_or_memory_segment(self._register.get(segment), index,
+                                                     'A')
+            else:
+                print("Unsuitable segment")
+        elif command == C_POP:
+            # it's a POP command,
+            # check if the segment is memory segment(LCL,ARG,THIS,THAT) or
+            # register segment(TEMP,POINTER) or
+            # CONSTANT segment
+            # STATIC
+            if segment in (LCL, ARG, THIS, THAT):
+                self.pop_register_or_memory_segment(self._segment.get(segment), index,
+                                                    'M')
+            elif segment in (TEMP, PTR):
+                self._register.get(segment)
+                self.pop_register_or_memory_segment(self._register.get(segment), index,
+                                                     'A')
+        else:
+            print("Invalid command")
 
     def append_address(self, address):
         """
         Writes into the output asm file A command (@+address)
         :param address: the address to point to
         """
-        self.asm_lines.append('@' + address)
+        self._asm_lines.append('@' + address)
 
     def change(self, dest, comp):
         """ Writes into the asm_lines list the comp command(dest=comp)
         :param dest:
         :param comp:
         """
-        self.asm_lines.append(dest + '=' + comp)
-
+        self._asm_lines.append(dest + '=' + comp)
 
     def write_output_asm_file(self):
         """ This method is responsible to write the asm_list into the output file
         """
-        for item in self.asm_lines:
+        for item in self._asm_lines:
             self._asm_file.write("{}\n".format(item))
         # close the output file
         self.close()
@@ -273,5 +336,5 @@ class CodeWriter:
         """
         Method for the convenience of the programmer - to print the asm lines so far.
         """
-        for line in self.asm_lines:
+        for line in self._asm_lines:
             print(line)

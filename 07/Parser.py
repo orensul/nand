@@ -3,6 +3,7 @@ import CodeWriter
 
 COMMENT = "//"
 
+
 class Parser:
     """ Handles the parsing of a single .vm file, and encapsulates access to the input
         code. It reads VM commands, parses them, and provides convenient access to their
@@ -36,7 +37,7 @@ class Parser:
         Should not be called if the current command is C_RETURN.
         """
         command_list = self.curr_command.split(" ")
-        if self.command_type() == CodeWriter:
+        if self.command_type() == CodeWriter.C_ARITHMETIC:
             return command_list[0]
         return command_list[1]
 
@@ -60,9 +61,11 @@ class Parser:
             if self.command_type() == CodeWriter.C_ARITHMETIC:
                 self.code_writer.write_arithmetic(self.curr_command)
             elif self.command_type() == CodeWriter.C_PUSH:
-                self.code_writer.write_push(self.arg1(), self.arg2())
+                 self.code_writer.write_push_pop(CodeWriter.C_PUSH, self.arg1(),
+                                                 self.arg2())
             elif self.command_type() == CodeWriter.C_POP:
-                self.code_writer.write_pop(self.arg1(), self.arg2())
+                self.code_writer.write_push_pop(CodeWriter.C_POP, self.arg1(),
+                                                self.arg2())
             else:
                 print("Invalid command")
 
