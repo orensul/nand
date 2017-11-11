@@ -26,29 +26,29 @@ CHIP ExtendAlu{
     // zy = instruction[3], ny = instruction[2], f = instruction[1], no = instruction[0], out = ALUOut
     //outMul = x*y
     // out = outMul if sel == 00
-    //	     shiftOut if sel == 01
+    //	     outShift if sel == 01
     //       outMul if sel == 10
     //       ALUOut if sel == 11
     //if Resultout != 0, if so zr = false
-    
+   
+    // calc the multiplication of x,y
+    Mul(a = x, b = y, out = outMul);
    
     // choose the correct shift command based on instruction[4..5]      
   
-    Mux16(a = y, b = x, sel = instruction[4], out = toShift);
-    ShiftLeft(in = toShift, out = SL);
-    ShiftRight(in = toShift , out = SR);
-    Mux16(a = SR, b = SL, sel = instruction[5], out = shiftOut); // Shifting result
+    Mux16(a = y, b = x, sel = instruction[4], out = shiftXorY);
+    ShiftLeft(in = shiftXorY, out = shiftL);
+    ShiftRight(in = shiftXorY , out = shiftR);
+    Mux16(a = shiftR, b = shiftL, sel = instruction[5], out = outShift); 
         
     // Call ALU 
     ALU(x = x, y = y, zx = instruction[5], nx = instruction[4], 
        zy = instruction[3], ny = instruction[2], f = instruction[1], no = instruction[0], 
        out = ALUOut);
 
-    // calc the multiplication of x,y
-    Mul(a = x, b = y, out = outMul);
     
     // Change the result of ALU or it remains the same according to instruction[7..8]     
-    Mux4Way16(a = outMul ,b = shiftOut ,c = outMul ,d = ALUOut , sel = instruction[7..8], out = out, out[0..7]=zer1, out[8..15]=zer2, out[15] = ng);
+    Mux4Way16(a = outMul ,b = outShift ,c = outMul ,d = ALUOut , sel = instruction[7..8], out = out, out[0..7]=zer1, out[8..15]=zer2, out[15] = ng);
 
     
     // check if Resultout != 0, if so zr = false
