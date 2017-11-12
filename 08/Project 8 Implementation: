@@ -1,0 +1,71 @@
+Project 8 Implementation:
+CodeWriter:
+WriteInit:
+Writes assembly code that effects the VM init, also called boostrap code.
+This code must be placed at the begining of the output file.
+
+
+
+Program Flow tests:
+
+BasicLoop:
+WriteGoto(label)
+add a method writeGoTo(label String)
+this method writes the assemble commands that effects the goto command
+
+Psuedo code:
+A=label
+0;JMP
+
+
+Fibonachi series:
+WriteLabel(label)
+add a method writeLabel(label String)
+this method writes the assemble commands that effects the label command
+
+
+
+writeIf(label):
+D=*SP
+A=label
+D;JNE
+
+Function Tests:
+
+WriteCall(functionName String, numArgs int)
+writes assembly code that effects the call command
+
+psuedoCode: Call f numArgs
+
+push return-address // Using the label declared below
+push LCL - saves LCL of the calling function
+push ARG - saves arg of the calling function
+push THIS - saves this
+push THAT - saves that
+ARG = SP-numArgs-5 // Reposition Arg
+LCL=SP // Reposition LCL
+A=f // the goto code
+0;JMP
+(return address) // Declare a label for the return address
+
+
+WriteReturn
+PsuedoCode:
+FRAME=LCL
+RET=*(FRAME-5) // put the return address in temp var
+*ARG=POP // reposition the return value for the caller
+SP=ARG+1 // Restore SP of the caller
+THAT=*(FRAME-1) // restore THAT of the caller
+THIS=*(FRAME-2) // restore THIS of the caller
+ARG=*(FRAME-3) // restore ARG of the caller
+LCL=*(FRAME-4) // restore LCL of the caller
+goto RET // goto return address (in the caller code)
+
+WriteFunction(FunctionName String, numLocals int)
+psuedo code:
+repeat numLocals times:
+	push 0
+
+
+
+
