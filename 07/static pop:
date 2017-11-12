@@ -1,0 +1,18 @@
+static pop:
+pop('D') // D=*SP
+@FileName.idx
+M=D
+
+
+static push:
+@FileName.idx
+D=M
+push('D')
+
+
+D=stack.pop(code ommited)
+pop static 5 -> @Foo.5 
+				M=D
+
+
+
