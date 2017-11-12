@@ -1,0 +1,32 @@
+
+
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Or.hdl
+
+ /**
+ * Or gate:
+ * out = 1 if (a == 1 or b == 1)
+ *       0 otherwise
+ */
+
+CHIP Or {
+    IN a, b;
+    OUT out;
+
+    PARTS:
+    // Not(Not(a) And Not(b)) = Or(a,b)
+    // Table of Truth:
+    // Not(Not(0) And Not(0)) = Not(1 And 1) = Not(1) = 0 = Or(0,0)
+    // Not(Not(0) And Not(1)) = Not(1 And 0) = Not(0) = 1 = Or(0,1)
+    // Not(Not(1) And Not(0)) = Not(0 And 1) = Not(0) = 1 = Or(1,0)
+    // Not(Not(1) And Not(1)) = Not(0 And 0) = Not(0) = 1 = Or(1,1)
+
+    Not(in = a, out = NotA);
+    Not(in = b, out = NotB);
+    And(a = NotA, b = NotB, out = NotAAndNotB);
+    Not(in = NotAAndNotB, out = out);
+}
+
+

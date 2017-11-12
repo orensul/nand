@@ -1,0 +1,61 @@
+/**
+* The input of the extends ALU is instruction[9] and x[16],y[16].
+* the output is define as follows:
+* If instruction[7..8] equals 1 the the output is exactly as the ALU.
+* Where instruction[5]=zx,instruction[4]=nx,...,instruction[0]=no.
+* If instruction[7] equals 0 the output will be x*y and disregard the rest 
+* of the instruction.
+*
+* If instruction[8] equals 0 the output will be shift.
+* Then, if instruction[4] equals 0 it will return shift of y otherwise shift 
+* of x, moreover if instruction[5] equals 0 it will return shift right 
+* otherwise shift left.
+**/
+
+CHIP ExtendAlu{
+    IN x[16],y[16],instruction[9];
+    OUT out[16],zr,ng;
+     
+    PARTS:
+    // psuedo code:
+    //if (instruction[4]) do: toShift = x
+    //else do : toShift = y
+    //if (instruction[4]) do: ShiftRight toShift
+    //else  ShiftLeft toShift
+    //Call ALU with : in = x,y , zx = instruction[5], nx = instruction[4], 
+    // zy = instruction[3], ny = instruction[2], f = instruction[1], no = instruction[0], out = ALUOut
+    //outMul = x*y
+    // out = outMul if sel == 00
+    //       outShift if sel == 01
+    //       outMul if sel == 10
+    //       ALUOut if sel == 11
+    //if Resultout != 0, if so zr = false
+   
+    // calc the multiplication of x,y
+    Mul(a = x, b = y, out = outMul);
+   
+    // choose the correct shift command based on instruction[4..5]      
+  
+    Mux16(a = y, b = x, sel = instruction[4], out = shiftXorY);
+    ShiftLeft(in = shiftXorY, out = shiftL);
+    ShiftRight(in = shiftXorY , out = shiftR);
+    Mux16(a = shiftR, b = shiftL, sel = instruction[5], out = outShift); 
+        
+    // Call ALU 
+    ALU(x = x, y = y, zx = instruction[5], nx = instruction[4], 
+       zy = instruction[3], ny = instruction[2], f = instruction[1], no = instruction[0], 
+       out = ALUOut);
+
+    
+    // Change the result of ALU or it remains the same according to instruction[7..8]     
+    Mux4Way16(a = outMul ,b = outShift ,c = outMul ,d = ALUOut , sel = instruction[7..8], out = out, out[0..7]=zer1, out[8..15]=zer2, out[15] = ng);
+
+    
+    // check if Resultout != 0, if so zr = false
+    Or8Way(in = zer1, out = First8Bits);
+    Or8Way(in = zer2, out = Last8Bits);
+    Or(a = First8Bits, b = Last8Bits, out = isZero);
+    Not(in = isZero, out = zr);
+        
+        
+}

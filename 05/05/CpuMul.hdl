@@ -1,0 +1,122 @@
+/**
+* This chip is an extension of the book CPU by using the extended ALU.
+* More specificly if instruction[15]==0 or (instruction[14] and instruction[13] equals 1)
+* the CpuMul behave exactly as the book CPU.
+* While if it is C instruction and instruction[13] == 0 the output will be D*A/M 
+* (according to instruction[12]).
+* Moreover, if it is c instruction and instruction[14] == 0 it will behave as follows:
+*
+* instruction:  | 12 | 11 | 10 |
+* _____________________________
+* shift left D  | 0  | 1  | 1  |
+* shift left A  | 0  | 1  | 0  |
+* shift left M  | 1  | 1  | 0  |
+* shift right D | 0  | 0  | 1  |
+* shift right A | 0  | 0  | 0  |
+* shift right M | 1  | 0  | 0  |
+**/
+
+CHIP CpuMul{
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset=1) or continue executing
+                         // the current program (reset=0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write into M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+     PARTS:
+     
+    
+    // psuedo code:
+    // if (instruction[15] && instruction[3]) writeM = true
+    // if (instruction[15] && instruction[4]) IsEALUOutToDReg = true
+    // if (instruction[15] && instruction[4]) IsEALUOutToAReg = true
+    // if (IsEALUOutToAReg) ARegInput = EALUOut
+    // else ARegInput = instruction
+    // if (!instruction[15] || IsEALUOutToAReg) ShouldLoadToAReg = true
+    // call AReg with (ARegInput, ShouldLoadToAReg)-> out->ARegOut, out[0..14]->addressM
+    // call DReg with (DRegInput, IsALUOutToDReg)-> out->DRegOut
+    // if (instruction[12]) AOrMRegister = ARegOut else AOrMRegister = inM
+    // call ExtendEAlu with (DRegOut, AOrMRegister,instruction[6..14](
+    // out->outM, out->EALUOut, zr->IsZero, ng->IsNeg
+    // if (instruction[0] && EALUOut IsPos) || (instruction[1] && EALUOut IsZero)
+    // || (instruction[2] && EALUOut IsNeg) jump = true
+    // if (jump && instruction[15]) ShouldLoadToPC = true
+    // call PC with (RegOut, ShouldLoadPC, reset, inc = true) out[0..14]->pc
+
+    
+        // Using of Destination Bits
+        // If it's C instruction, EALU output simultnously fed into 3 registers: D-Register, 
+        // A-Register, M-Register. this code decides by the 3 destination bits 
+        // (exm. 000 no container will recive the output, 111 all of them will recive)
+
+        And(a = instruction[15], b = instruction[3], out = writeM);
+        And(a = instruction[15], b = instruction[4], out = IsEALUOutToDReg);
+        And(a = instruction[15], b = instruction[5], out = IsEALUOutToAReg);
+
+        // choose the input to Register A it can be the EALU output or the instruction
+        // it will be EALU output if it's C instruction and the bit number 5 is 1.
+        Mux16(a = instruction, b = EALUOut, sel = IsEALUOutToAReg, out = ARegInput);
+
+        // we have two options in which we should load new value into A Register
+        // 1. It's A Instruction - we should load the instruction
+        // 2. It's C Instruction and bit number 5 in the instruction is 1
+
+        Not(in = instruction[15], out = IsAInstruction);
+        Or(a = IsAInstruction, b = IsEALUOutToAReg, out = ShouldLoadToAReg);
+
+        // Load into ARegister the new input or stay with the same value in the register
+        // According to ShouldLoadToAReg
+        ARegister(in = ARegInput, load = ShouldLoadToAReg, out = ARegOut, 
+        out[0..14] = addressM);
+
+        // Now decides if to load into  DRegister
+        DRegister(in = EALUOut, load = IsEALUOutToDReg, out = DRegOut);    
+
+ 
+        // determine what will be the input to the EALU
+        // From D register or From A register / M register
+
+        Mux16(a = ARegOut, b = inM, sel = instruction[12], out = AOrMRegister); 
+
+        // Using Control Bits to know which operation EALU should do according to 
+        // 6 bits (also taken from the instruction)
+
+        // Call ExtendEAlu for calculation
+        // as the table above we need to match:
+        // CpuMu instruction[14] => ExtendAl instruction[8]
+        // CpuMu instruction[13] => ExtendAl instruction[7] 
+        // CpuMu instruction[11] => ExtendAl instruction[5]
+        // CpuMu instruction[10] => ExtendAl instruction[4]
+        ExtendAlu(x = DRegOut, y = AOrMRegister, instruction = instruction[6..14],
+        out = outM, out = EALUOut, zr = IsZero, ng = IsNeg );
+
+        // Program Counter (PC) logic:
+        // if (reset==1) PC = 0
+        // else load = f(jump bits, EALU control outputs)
+        // if (load==1) PC = A
+        // else PC++
+
+        // data of EALU output
+        Or(a = IsZero, b = IsNeg, out = IsNotPos);
+        Not(in = IsNotPos, out = IsPos);
+
+        // data from first 3 bits of the instruction (j bits)
+
+        And(a = instruction[0], b = IsPos, out = JGT); // JGT
+        And(a = instruction[1], b = IsZero, out = JEQ); // JEQ
+        And(a = instruction[2], b = IsNeg, out = JLT); // JLT
+
+        Or(a = JEQ, b = JLT, out = JLE);
+        Or(a = JLE, b = JGT,out = Jump);
+
+        And(a = Jump, b = instruction[15], out = ShouldLoadPC);
+        PC(in = ARegOut, load = ShouldLoadPC, reset = reset, inc = true, 
+            out[0..14] = pc);
+
+}
