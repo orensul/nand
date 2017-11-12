@@ -16,7 +16,7 @@ class Parser:
             (VMTranslator.SOURCE_FILE_EXTENSION, VMTranslator.DEST_FILE_EXTENSION)
 
         self.code_writer = CodeWriter.CodeWriter(self.output_file_path)
-
+        self.code_writer.set_file_name(vm_file_name)
         self.curr_command = ""
         self.vm_lines = []
         self.read_file(vm_file_name)
@@ -104,4 +104,3 @@ class Parser:
         VM file"""
         for line in self.vm_lines:
             print(line)
-
