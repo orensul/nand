@@ -62,6 +62,8 @@ class CodeWriter:
         # with different names.
         self._label_num = 0
 
+        self._file_name = ""
+
         # initialize the Stack pointer to start from 256
         self.init_sp()
 
@@ -218,6 +220,47 @@ class CodeWriter:
         # *addr = D = *SP
         self.change('M', 'D')
 
+    def pop_static_segment(self, label):
+        """
+         This method is responsible to translate pop segment i
+        segment of static
+        :param label: the label of the static variable
+        """
+        # D=*SP, SP--
+        self.dec_sp()
+        self.peek('D')
+        self.append_address(label)
+        self.change('M', 'D')
+
+
+    def push_static_segment(self,label):
+        """
+        This method is responsible to translate push segment i
+        segment of static
+        :param label: the label of the static variable
+        """
+        self.append_address(label)
+        self.change('D', 'M')
+        self.push('D')
+
+    def set_file_name(self, file_name):
+        """
+        set the file name
+        :param file_name: tha name of the file we need to translate
+        :return: the name of the file
+        """
+        self._file_name = file_name
+
+    def create_static_label(self, index):
+        """
+        This method creates the label of the static variable.
+        the label consists of the file name (without it's type) dot the index of the static variable.
+        :param index: the static number at the vm command
+        :return: the label we create
+        """
+        file_name = self._file_name.split(".")[0]
+        return str(file_name) + "." + str(index)
+
     def write_push_pop(self, command, segment, index):
         """
         Writes the assembly code that is the translation of the given command, where
@@ -237,6 +280,8 @@ class CodeWriter:
             elif segment in (TEMP, PTR):
                 self.push_register_or_memory_segment(self._register.get(segment), index,
                                                      'A')
+            elif segment == STATIC:
+                self.push_static_segment(self.create_static_label(index))
             else:
                 print("Unsuitable segment")
         elif command == C_POP:
@@ -250,8 +295,10 @@ class CodeWriter:
                                                     'M')
             elif segment in (TEMP, PTR):
                 self._register.get(segment)
-                self.pop_register_or_memory_segment(self._register.get(segment), index,
-                                                     'A')
+                self.pop_register_or_memory_segment(self._register.get(segment), index,'A')
+            elif segment == STATIC:
+                self.pop_static_segment(self.create_static_label(index))
+
         else:
             print("Invalid command")
 
