@@ -1,0 +1,123 @@
+Week 10: 
+- Two tier compliation process: first into VM code then translate VM code into machine language.
+Compiler->VM translator
+
+- This module - Synatax Analyzer(tokenizer->parser)-> output in XML
+-------- TOKENIZER ---------
+Writing Tokenizer (Lexical Analysis)
+Tokenizing - generate only the relevant signs
+In Jack programming language we have 5 categories of tokens: Keywords, Symbols, integerConstants, stringConstants, identifiers
+
+TokenizerTest- creating an output such that for each token we have the correct category like this:
+<keyword> if </keyword>
+<symbol> ( </symbol>
+....
+
+From now on the tokenizer will represent the input to the compiler.
+tknzr = new JackTokenizer("Prog.jack");
+tknzr.advance();
+while tknzr.HasMoreTokens(){
+	tokenClassification = current token classification
+	print "<" + tokenClassification + ">" 
+	print the current token value
+	print "</" + tokenClassification + ">"
+}
+
+-------- Grammers ---------
+Jack grammer(subset)
+
+statement: ifStatement | whileStatement | letStatement
+statements: statement*
+ifStatement: 'if '(' expression ')' '{' statements '}'
+whileStatement: 'while '(' expression ')' '{' statements '}'
+letStatement: 'let' varName '=' expression ';'
+expression: term (op term)?
+term: varName | constant
+varName: a string not beginning with a digit
+constant: a decimal number
+op: '+' | '-' | '=' | '>' | '<'
+
+Parsing: Determining if a given input conforms to a grammer.
+
+Parse Trees:
+
+------ Parser Logic -------
+Parser
+
+class CompilationEngine{
+	compileStatements(){
+
+	}
+	compileIfStatement(){
+
+	}
+	compileWhileStatement(){
+	
+	}
+	compileTerm(){
+
+	}
+}
+
+LL grammer: can be parsed by a recursive descent parser without backtracking
+LL(k) parser: a parser that needs to look ahead at most k tokens in order to determine which rule is applicable
+The grammer that we saw so far is LL(1)
+
+
+------ The Jack Grammer -------
+Lexical elements: we already saw in grammers
+program structure:
+
+class: 'class' className '{' classVarDec* subroutineDec* '}'
+classVarDec: ('static'|'field')type varName(','varName)* ';'
+type: 'int'|'char'|'boolean'|className
+subroutineDec: ('constructor'|'function'|'method')('void'|type) subroutineName '(' parameterList ')' subroutineBody
+parameterList: ((type varName)) (',' type varName)*)?
+subroutineBody: '{' varDec* statements '}'
+varDec: 'var' type varName (','varName)*';'
+className: identifier
+subroutineName: identifier
+varName: identifier
+
+Statements:
+statements: statement*
+statement: letStatement|ifStatement|whileStatement|doStatement|returnStatement
+
+Expressions:
+
+------ The Jack Analyzer -------
+
+The parser generates XML output (marked-up output), the mark up creates a textual parse tree, generated according to the jack grammer.
+
+Proposed implementation:
+3 modules of Syntax Analyzer:
+- JackTokenizer
+- CompliationEngine
+- JackAanalyzer(top-most module)
+
+Input: fileName.jack or directoryName containing jack files
+Output: if the input is single file: fileName.xml
+		if the input is a directory: one .xml file for every .jack file, stored in the same directory.
+
+The jackAnalyzer uses the service of the jackTokenizer
+
+
+1. Develop Tokenizer:
+
+The Tokenizer encapsulates the input, once we have tokenizer we don't have to worry of the input file
+Allows:
+- ignoring whitespace
+- advance the input one token at a time
+- getting a value and type of current token
+
+class JackTokenizer{
+	//constructor(code omitted)
+	hasMoreToTokens()
+	advance()
+	tokenType()
+}
+for exm. getX() advance will give 'getX' then '(' then ')'
+
+
+
+
