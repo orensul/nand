@@ -88,8 +88,11 @@ class Parser:
         # extracts the dest, comp and jump strings from the instruction
         if '=' in instruction and ';' in instruction:
             dest = instruction.split('=')[0]
-            comp = instruction.split('=')[1]
-            jump = instruction.split(';')[1]
+            truncated_instruction = instruction.split('=')[1]
+            comp = truncated_instruction.split(';')[0]
+            jump = truncated_instruction.split(';')[1]
+            if len(jump) == 0:
+                jump = 'null'
         elif '=' in instruction and ';' not in instruction:
             dest = instruction.split('=')[0]
             comp = instruction.split('=')[1]
@@ -98,6 +101,8 @@ class Parser:
             dest = 'null'
             comp = instruction.split(';')[0]
             jump = instruction.split(';')[1]
+            if len(jump) == 0:
+                jump = 'null'
 
         # using the methods of Code class we will get the corresponding binary of
         # comp, dest and jump, then after concatenation binary_value will be the result
