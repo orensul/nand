@@ -1,0 +1,71 @@
+function OverFlowTestsLT.ltTest 1
+
+push constant 3010
+pop pointer 0			// set THIS to 3010
+
+
+push argument 0			// x = 32767
+push argument 0			// y = 32767
+lt						// push x < y in the stack
+pop this 0				// put result in RAM[3010]
+
+push this 0
+push local 0
+add
+pop local 0
+
+
+
+push argument 0			// x = 32767
+push argument 0			// y = 32767
+neg						// y = -32767
+lt						// push x < y in the stack
+pop this 1				// put result in RAM[3011]
+
+push this 1
+push local 0
+add
+pop local 0
+
+
+
+push argument 1			// x = 30000
+push argument 1			// y = 30000
+neg						// y = -30000
+lt						// push x < y in the stack
+pop this 2				// put result in RAM[3012]
+
+push this 2
+push local 0
+add
+pop local 0
+
+
+
+push argument 2			// x = 16384
+push argument 2			// y = 16384
+neg						// y = -16384
+lt						// push x < y in the stack
+pop this 3				// put result in RAM[3013]
+
+push this 3
+push local 0
+add
+pop local 0
+
+
+
+push argument 3			// x = 1
+push argument 3			// y = 1
+neg						// y = -1
+lt						// push x < y in the stack
+pop this 4				// put result in RAM[3014]
+
+push this 4
+push local 0
+add
+pop local 0
+
+
+push local 0
+return

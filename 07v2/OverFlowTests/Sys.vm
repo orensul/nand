@@ -1,0 +1,29 @@
+function Sys.init 0
+
+push constant 3015
+pop pointer 0
+
+push constant 32767
+push constant 30000
+push constant 16384
+push constant 1
+call OverFlowTestsGT.gtTest 4
+pop this 0
+
+push constant 32767
+push constant 30000
+push constant 16384
+push constant 1
+call OverFlowTestsLT.ltTest 4
+pop this 1
+
+push constant 32767
+push constant 30000
+push constant 16384
+push constant 1
+call OverFlowTestsEQ.eqTest 4
+pop this 2
+
+
+label WHILE
+goto WHILE              // loops infinitely

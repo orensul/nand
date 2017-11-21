@@ -1,0 +1,19 @@
+push constant 30000
+push constant 30000
+neg
+gt
+
+push constant 32767
+push constant 32766
+neg
+eq
+
+push constant 32766
+push constant 32766
+neg
+lt
+
+push constant 32767
+push constant 32766
+neg
+gt

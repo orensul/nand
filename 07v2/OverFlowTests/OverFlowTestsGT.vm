@@ -1,0 +1,71 @@
+function OverFlowTestsGT.gtTest 1
+
+push constant 3005
+pop pointer 0			// set THIS to 3005
+
+
+push argument 0			// x = 32767
+push argument 0			// y = 32767
+gt						// push x > y in the stack
+pop this 0				// put result in RAM[3005]
+
+push this 0
+push local 0
+add
+pop local 0
+
+
+
+push argument 0			// x = 32767
+push argument 0			// y = 32767
+neg						// y = -32767
+gt						// push x > y in the stack
+pop this 1				// put result in RAM[3006]
+
+push this 1
+push local 0
+add
+pop local 0
+
+
+
+push argument 1			// x = 30000
+push argument 1			// y = 30000
+neg						// y = -30000
+gt						// push x > y in the stack
+pop this 2				// put result in RAM[3007]
+
+push this 2
+push local 0
+add
+pop local 0
+
+
+
+push argument 2			// x = 16384
+push argument 2			// y = 16384
+neg						// y = -16384
+gt						// push x > y in the stack
+pop this 3				// put result in RAM[3008]
+
+push this 3
+push local 0
+add
+pop local 0
+
+
+
+push argument 3			// x = 1
+push argument 3			// y = 1
+neg						// y = -1
+gt						// push x > y in the stack
+pop this 4				// put result in RAM[3009]
+
+push this 4
+push local 0
+add
+pop local 0
+
+
+push local 0
+return
