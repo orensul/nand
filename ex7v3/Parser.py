@@ -12,8 +12,8 @@ class Parser:
     def __init__(self, folder_path, vm_file_name):
         self.vm_trans = VMtranslator.VMtranslator()
         self.vm_file_path = folder_path + vm_file_name
-        self.output_file_path = folder_path + vm_file_name.replace \
-            (VMtranslator.SOURCE_FILE_EXTENSION, VMtranslator.DEST_FILE_EXTENSION)
+        self.output_file_path = folder_path + vm_file_name.\
+            replace(VMtranslator.SOURCE_FILE_EXTENSION, VMtranslator.DEST_FILE_EXTENSION)
 
         self.code_writer = CodeWriter.CodeWriter(self.output_file_path)
         self.code_writer.set_file_name(vm_file_name)
@@ -36,7 +36,7 @@ class Parser:
         In the case of C_ARITHMETIC, the command itself (add, sub, etc.) is returned.
         """
         command_list = self.curr_command.split(" ")
-        if self.command_type() == CodeWriter.C_ARITHMETIC:
+        if self.command_type() == CodeWriter.ARITHMETIC:
             return command_list[0]
         return command_list[1]
 
@@ -55,13 +55,13 @@ class Parser:
 
         for command in self.vm_lines:
             self.advance(command)
-            if self.command_type() == CodeWriter.C_ARITHMETIC:
+            if self.command_type() == CodeWriter.ARITHMETIC:
                 self.code_writer.write_arithmetic(self.curr_command)
-            elif self.command_type() == CodeWriter.C_PUSH:
-                 self.code_writer.write_push_pop(CodeWriter.C_PUSH, self.arg1(),
-                                                 self.arg2())
-            elif self.command_type() == CodeWriter.C_POP:
-                self.code_writer.write_push_pop(CodeWriter.C_POP, self.arg1(),
+            elif self.command_type() == CodeWriter.PUSH:
+                self.code_writer.write_push_pop(CodeWriter.PUSH, self.arg1(),
+                                                self.arg2())
+            elif self.command_type() == CodeWriter.POP:
+                self.code_writer.write_push_pop(CodeWriter.POP, self.arg1(),
                                                 self.arg2())
             else:
                 print("Invalid command")

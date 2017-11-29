@@ -2,9 +2,9 @@
 LABEL_BEGIN = '('
 LABEL_END = ')'
 SP_START_ADDRESS = '256'
-C_ARITHMETIC = 0
-C_PUSH = 1
-C_POP = 2
+ARITHMETIC = 0
+PUSH = 1
+POP = 2
 LCL = 'local'
 ARG = 'argument'
 THIS = 'this'
@@ -14,11 +14,12 @@ TEMP = 'temp'
 CONST = 'constant'
 STATIC = 'static'
 
+TRUE = '-1'
+FALSE = '0'
+
 
 class CodeWriter:
-
     """The CodeWriter class Translates VM commands into Hack assembly code. """
-
     def __init__(self, asm_file):
 
         # first, initialization of dictionaries which will be used by this class
@@ -29,27 +30,27 @@ class CodeWriter:
                                       'lt': 'JLT'})
         # commands:
         self._command_type = dict()
-        self._command_type.update({'C_ARITHMETIC': 0, 'C_PUSH': 1, 'C_POP': 2})
+        self._command_type.update({'ARITHMETIC': 0, 'PUSH': 1, 'POP': 2})
 
         # command type-name mapping:
         self._command_mapping = dict()
-        self._command_mapping.update({'add': 'C_ARITHMETIC', 'sub': 'C_ARITHMETIC',
-                                      'neg': 'C_ARITHMETIC', 'eq': 'C_ARITHMETIC',
-                                      'gt': 'C_ARITHMETIC', 'lt': 'C_ARITHMETIC',
-                                      'and': 'C_ARITHMETIC', 'or': 'C_ARITHMETIC',
-                                      'not': 'C_ARITHMETIC', 'push': 'C_PUSH',
-                                      'pop': 'C_POP'})
+        self._command_mapping.update({'add': 'ARITHMETIC', 'sub': 'ARITHMETIC',
+                                      'neg': 'ARITHMETIC', 'eq': 'ARITHMETIC',
+                                      'gt': 'ARITHMETIC', 'lt': 'ARITHMETIC',
+                                      'and': 'ARITHMETIC', 'or': 'ARITHMETIC',
+                                      'not': 'ARITHMETIC', 'push': 'PUSH',
+                                      'pop': 'POP'})
         # segments
         self._segment = dict()
         self._segment.update({'local': 'LCL', 'argument': 'ARG', 'this': 'THIS',
                               'that': 'THAT', 'pointer': 'PTR', 'temp': 'TEMP',
-                              'constant': 'CONST', 'static': 'STATIC', 'reg': 'REG'})
+                              'constant': 'CONST', 'static': 'STATIC'})
 
         # registers
         self._register = dict()
         self._register.update({'SP': 'R0', 'local': 'R1', 'argument': 'R2',
-                               'this': 'R3', 'that': 'R4', 'temp': 'R5',
-                               'pointer': 'R3', 'REG_COPY': 'R13'})
+                               'pointer': 'R3', 'this': 'R3', 'that': 'R4',
+                               'temp': 'R5', 'REG_COPY': 'R13'})
 
         # prepare the output asm file to be ready to be written
         self._asm_file = open(asm_file, 'w')
@@ -111,49 +112,68 @@ class CodeWriter:
         elif command == 'lt' or command == 'gt':
             self.dec_sp()
             self.peek('D')
-            #if the stack head is positive
-            self.append_jump_to_label("positive" + "_label" + str(self._label_num), 'JGT')
-            #the stack head is negative
+
+            # if the stack head is positive
+            self.append_jump_to_label("positive" + "_label" +
+                                      str(self._label_num), 'JGT')
+
+            # the stack head is negative
             self.dec_sp()
             self.append_address(self._register.get('REG_COPY'))
             self.change('M', 'D')
             self.peek('D')
+
             # if the second number from stack head is negative
-            self.append_jump_to_label("same_sign" + "_label" + str(self._label_num),'JLT')
-            #the second number from stack head is positive so jump
-            self.append_jump("diff_sign_stack_top_neg_second_pos" + "_label" + str(self._label_num))
-            #the stack head is positive, we want to check the second number
+            self.append_jump_to_label("same_sign" + "_label" + str(self._label_num),
+                                      'JLT')
+
+            # the second number from stack head is positive so jump
+            self.append_jump("diff_sign_stack_top_neg_second_pos" + "_label" +
+                             str(self._label_num))
+
+            # the stack head is positive, we want to check the second number
             self.append_label("positive" + "_label" + str(self._label_num))
             self.dec_sp()
             self.append_address(self._register.get('REG_COPY'))
             self.change('M', 'D')
             self.peek('D')
+
             # the stack head is positive if the second number is positive
-            self.append_jump_to_label("same_sign" + "_label" + str(self._label_num), 'JGT')
+            self.append_jump_to_label("same_sign" + "_label" + str(self._label_num),
+                                      'JGT')
+
             # the stack head is positive second number from stack head is negative
-            self.append_jump("diff_sign_stack_top_pos_second_neg" + "_label" + str(self._label_num))
+            self.append_jump("diff_sign_stack_top_pos_second_neg" + "_label" +
+                             str(self._label_num))
+
             # the stack head is positive second number from stack head is positive
             self.append_label("same_sign" + "_label" + str(self._label_num))
             self.append_address(self._register.get('REG_COPY'))
             self.change('A', 'M')
             self.change('D', 'D-A')
             self.base_handle(command)
-            #jump to continue program
+
+            # jump to continue program
             self.append_jump("continue" + "_label" + str(self._label_num))
+
             # the stack head is positive anf the second number is negative
-            self.append_label("diff_sign_stack_top_pos_second_neg" + "_label" + str(self._label_num))
+            self.append_label("diff_sign_stack_top_pos_second_neg" + "_label" +
+                              str(self._label_num))
             if command == 'lt':
                 self.push('-1')
             if command == 'gt':
-                self.push('0')
+                self.push(FALSE)
             # continue program
             self.append_jump("continue" + "_label" + str(self._label_num))
+
             # the stack head is negative the second number is positive
-            self.append_label("diff_sign_stack_top_neg_second_pos" + "_label" + str(self._label_num))
+            self.append_label("diff_sign_stack_top_neg_second_pos" + "_label" +
+                              str(self._label_num))
             if command == 'lt':
-                self.push('0')
+                self.push(FALSE)
             if command == 'gt':
-                self.push('-1')
+                self.push(TRUE)
+
             # continue program
             self.append_label("continue" + "_label" + str(self._label_num))
             self._label_num += 1
@@ -164,7 +184,7 @@ class CodeWriter:
             self.peek('A')
             self.change('D', 'A-D')
             self.base_handle(command)
-            #self.append_label("n_" + command + "_label" + str(self._label_num))
+
             self.append_label("continue" + "_label" + str(self._label_num))
             self._label_num += 1
 
@@ -172,21 +192,26 @@ class CodeWriter:
             print("Invalid Arithmetic command")
 
     def base_handle(self, command):
+        """
+        Basic handle when no overflow can occur (we are safe if both numbers have
+        the same sign - both positive or negative)
+        :param command: The arithmetic command
+        """
         operation = self._arithmetic_name.get(command)
 
-
-        # it's important to add the _label_num to the label name, otherwise, if we
+        # its important to add the _label_num to the label name, otherwise, if we
         # have several eq_label for example, it will jump to the last of them which
         # will be a bug!
+
         label = "_label" + str(self._label_num)
 
         # vm represents true as -1 (minus one, 0xFFFF) and false as  0 (zero, 0x0000)
         self.append_jump_to_label(command + label, operation)
-        self.push('0')
-        #self.append_jump("n_" + command + label)
+        self.push(FALSE)
+
         self.append_jump("continue" + "_label" + str(self._label_num))
         self.append_label(command + label)
-        self.push('-1')
+        self.push(TRUE)
 
     def append_label(self, label_name):
         """ Adds to the asm_lines list a line of label declaration (Label_name)
@@ -288,7 +313,7 @@ class CodeWriter:
         self.append_address(label)
         self.change('M', 'D')
 
-    def push_static_segment(self,label):
+    def push_static_segment(self, label):
         """
         This method is responsible to translate push segment i
         segment of static
@@ -321,8 +346,12 @@ class CodeWriter:
         """
         Writes the assembly code that is the translation of the given command, where
         command is either C_PUSH or C_POP.
+        :param command:
+        :param segment:
+        :param index:
+        :return:
         """
-        if command == C_PUSH:
+        if command == PUSH:
             # it's a PUSH command,
             # check if the segment is memory segment(LCL,ARG,THIS,THAT) or
             # register segment(TEMP,POINTER) or
@@ -340,7 +369,7 @@ class CodeWriter:
                 self.push_static_segment(self.create_static_label(index))
             else:
                 print("Unsuitable segment")
-        elif command == C_POP:
+        elif command == POP:
             # it's a POP command,
             # check if the segment is memory segment(LCL,ARG,THIS,THAT) or
             # register segment(TEMP,POINTER) or
@@ -351,7 +380,8 @@ class CodeWriter:
                                                     'M')
             elif segment in (TEMP, PTR):
                 self._register.get(segment)
-                self.pop_register_or_memory_segment(self._register.get(segment), index,'A')
+                self.pop_register_or_memory_segment(self._register.get(segment),
+                                                    index, 'A')
             elif segment == STATIC:
                 self.pop_static_segment(self.create_static_label(index))
             else:
