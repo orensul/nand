@@ -60,28 +60,31 @@ class CompilationEngine:
         xml_row = self.create_xml_entry(element_name, value)
         self.xml_lines.append(xml_row)
 
+    def append_xml_lines(self, num_of_lines):
+        """
+        Call to append_next_xml_line method which creates xml row, several times
+        :param num_of_lines: number of lines to create
+        """
+        for i in range(num_of_lines):
+            self.append_next_xml_line()
+
     def compile_class(self):
         """
         Compiles a complete class.
         """
         self.xml_lines.append("<class>")
         # write <keyword> class </keyword>
-        self.append_next_xml_line()
-        # write <identifier> name of class </identifier>
-        self.append_next_xml_line()
-        # write <symbol>{</symbol>
-        self.append_next_xml_line()
-
+        # <identifier> name of class </identifier>
+        # <symbol>{</symbol>
+        self.append_xml_lines(3)
         # compile the variable declarations part of the class if exist
         self.compile_var_dec(True)
-
         # class can contain constructor and one or more methods|functions (subroutines)
         # here we will compile all of the subroutines
         while self.tokenizer.peek_next_token()[TOKEN_NAME] in keywords_mapping.keys() \
                 and keywords_mapping[self.tokenizer.peek_next_token()[TOKEN_NAME]] == \
                 'subroutineDec':
             self.compile_subroutine()
-
         # write <symbol>}</symbol>
         self.append_next_xml_line()
         self.xml_lines.append("</class>")
@@ -101,21 +104,14 @@ class CompilationEngine:
                 == var_dec_str:
             self.xml_lines.append('<' + var_dec_str + '>')
             # write <keyword> field or static </keyword>
-            self.append_next_xml_line()
-
-            # write <identifier> variable type </identifier>
-            self.append_next_xml_line()
-
-            # write <identifier> variable name </identifier>
-            self.append_next_xml_line()
-
+            # <identifier> variable type </identifier>
+            # <identifier> variable name </identifier>
+            self.append_xml_lines(3)
             # compile line of multi variable declarations (Separated by ',')
             while self.tokenizer.peek_next_token()[TOKEN_NAME] == JackTokenizer.COMMA:
                 # write <symbol>,</symbol>
-                self.append_next_xml_line()
-                # write <identifier> new var name </identifier>
-                self.append_next_xml_line()
-
+                # <identifier> new var name </identifier>
+                self.append_xml_lines(2)
             # write <symbol>;</symbol>
             self.append_next_xml_line()
             self.xml_lines.append('</' + var_dec_str + '>')
@@ -126,35 +122,23 @@ class CompilationEngine:
         """
         self.xml_lines.append('<subroutineDec>')
         # write <keyword>type of the subroutine</keyword>
-        self.append_next_xml_line()
-        # write <identifier>return type of the subroutine</identifier>
-        self.append_next_xml_line()
-        # write <identifier>name of subroutine</identifier>
-        self.append_next_xml_line()
-
-        # write <symbol>(</symbol>
-        self.append_next_xml_line()
-
+        # <identifier>return type of the subroutine</identifier>
+        # <identifier>name of subroutine</identifier>
+        # <symbol>(</symbol>
+        self.append_xml_lines(4)
         # compile the parameters of the subroutine
         self.compile_parameter_list()
-
         # write <symbol>)</symbol>
         self.append_next_xml_line()
-
         self.xml_lines.append('<subroutineBody>')
-
         # write <symbol>{</symbol>
         self.append_next_xml_line()
-
         # compile the variable declarations part of the subroutine if exist
         self.compile_var_dec(False)
-
         # compile the subroutine body
         self.compile_statements()
-
         # write <symbol>}</symbol>
         self.append_next_xml_line()
-
         self.xml_lines.append('</subroutineBody>')
         self.xml_lines.append('</subroutineDec>')
 
@@ -162,22 +146,17 @@ class CompilationEngine:
         """
         Compiles a (possibly empty) parameter list, not including the enclosing “()”.
         """
-
         self.xml_lines.append('<parameterList>')
-
         while not self.tokenizer.peek_next_token()[TOKEN_NAME] == \
                 JackTokenizer.END_PARENTHESES:
             self.append_next_xml_line()
-
         self.xml_lines.append('</parameterList>')
 
     def compile_statements(self):
         """
         Compiles a sequence of statements, not including the enclosing “{}”.
         """
-
         self.xml_lines.append('<statements>')
-
         # now, it can be one of the following:
         # letStatement | ifStatement | whileStatement | doStatement | returnStatement
         token_name = self.tokenizer.peek_next_token()[TOKEN_NAME]
@@ -203,28 +182,20 @@ class CompilationEngine:
         """
         self.xml_lines.append('<doStatement>')
         # write <keyword> do </keyword>
-        self.append_next_xml_line()
-
-        # write <identifier> name of do </identifier>
-        self.append_next_xml_line()
-
+        # <identifier> name of do </identifier>
+        self.append_xml_lines(2)
         if self.tokenizer.peek_next_token()[TOKEN_NAME] == JackTokenizer.DOT:
             # write <symbol> . </symbol>
-            self.append_next_xml_line()
-            # write <identifier> name of func </identifier>
-            self.append_next_xml_line()
+            # <identifier> name of func </identifier>
+            self.append_xml_lines(2)
 
         # write <symbol> ( </symbol>
         self.append_next_xml_line()
-
         self.compile_expression_list()
 
         # write <symbol> ) </symbol>
-        self.append_next_xml_line()
-
-        # write  <symbol> ; </symbol>
-        self.append_next_xml_line()
-
+        # <symbol> ; </symbol>
+        self.append_xml_lines(2)
         self.xml_lines.append('</doStatement>')
 
     def compile_let(self):
@@ -233,56 +204,36 @@ class CompilationEngine:
         """
         self.xml_lines.append('<letStatement>')
         # write <keyword> let </keyword>
-        self.append_next_xml_line()
-
-        # write <identifier> name of assignee </identifier>
-        self.append_next_xml_line()
-
+        # <identifier> name of assignee </identifier>
+        self.append_xml_lines(2)
         if self.tokenizer.peek_next_token()[TOKEN_NAME] == JackTokenizer.START_BRACKETS:
             # write  <symbol> [ </symbol>
             self.append_next_xml_line()
-
             self.compile_expression()
-
             # write  <symbol> ] </symbol>
             self.append_next_xml_line()
-
         # write  <symbol> = </symbol>
         self.append_next_xml_line()
-
         self.compile_expression()
-
         # write  <symbol> ; </symbol>
         self.append_next_xml_line()
-
         self.xml_lines.append('</letStatement>')
 
     def compile_while(self):
         """
         Compiles a while statement.
         """
-
         self.xml_lines.append('<whileStatement>')
-
         # write <keyword> while </keyword>
-        self.append_next_xml_line()
-
-        # write <symbol> ( </symbol>
-        self.append_next_xml_line()
-
+        # <symbol> ( </symbol>
+        self.append_xml_lines(2)
         self.compile_expression()
-
         # write <symbol> ) </symbol>
-        self.append_next_xml_line()
-
-        # write <symbol> { </symbol>
-        self.append_next_xml_line()
-
+        # <symbol> { </symbol>
+        self.append_xml_lines(2)
         self.compile_statements()
-
         # write <symbol> } </symbol>
         self.append_next_xml_line()
-
         self.xml_lines.append('</whileStatement>')
 
     def compile_return(self):
@@ -308,27 +259,20 @@ class CompilationEngine:
         """
         self.xml_lines.append('<ifStatement>')
         # write <keyword> if </keyword>
-        self.append_next_xml_line()
-        # write  <symbol> ( </symbol>
-        self.append_next_xml_line()
-
+        # <symbol> ( </symbol>
+        self.append_xml_lines(2)
         self.compile_expression()
         # write  <symbol> ) </symbol>
-        self.append_next_xml_line()
-
-        # write  <symbol> { </symbol>
-        self.append_next_xml_line()
-
+        # <symbol> { </symbol>
+        self.append_xml_lines(2)
         self.compile_statements()
-
         # write  <symbol> } </symbol>
         self.append_next_xml_line()
 
         if self.tokenizer.peek_next_token()[TOKEN_NAME] == 'else':
             # write <keyword> else </keyword>
-            self.append_next_xml_line()
-            # write  <symbol> { </symbol>
-            self.append_next_xml_line()
+            # <symbol> { </symbol>
+            self.append_xml_lines(2)
             self.compile_statements()
             # write  <symbol> } </symbol>
             self.append_next_xml_line()
@@ -359,7 +303,6 @@ class CompilationEngine:
         this term and should not be advanced over.
         """
         self.xml_lines.append('<term>')
-
         if self.tokenizer.peek_next_token()[TOKEN_NAME] in \
                 JackTokenizer.keyword_constant or self.tokenizer.peek_next_token() \
             [TOKEN_TYPE] in ['integerConstant', 'stringConstant']:
@@ -371,11 +314,9 @@ class CompilationEngine:
             # between variable, array entry and subroutine call
             if self.tokenizer.peek_next_token()[TOKEN_NAME] == JackTokenizer.DOT:
                 # write <symbol> . </symbol>
-                self.append_next_xml_line()
-                # write <identifier> new </identifier>
-                self.append_next_xml_line()
-                # write <symbol> ( </symbol>
-                self.append_next_xml_line()
+                # <identifier> new </identifier>
+                # <symbol> ( </symbol>
+                self.append_xml_lines(3)
                 self.compile_expression_list()
                 # write <symbol> ) </symbol>
                 self.append_next_xml_line()
@@ -414,12 +355,10 @@ class CompilationEngine:
         if not self.tokenizer.peek_next_token()[TOKEN_NAME] == \
                 JackTokenizer.END_PARENTHESES:
             self.compile_expression()
-
         while self.tokenizer.peek_next_token()[TOKEN_NAME] == JackTokenizer.COMMA:
             # write <symbol> , </symbol>
             self.append_next_xml_line()
             self.compile_expression()
-
         self.xml_lines.append('</expressionList>')
 
     def create_xml_entry(self, element_name, value):
