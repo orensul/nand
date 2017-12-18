@@ -26,6 +26,8 @@ TRUE = '-1'
 FALSE = '0'
 
 
+
+
 class CodeWriter:
     """The CodeWriter class Translates VM commands into Hack assembly code. """
     def __init__(self, asm_file, file_order):
@@ -65,8 +67,8 @@ class CodeWriter:
         self._register = dict()
         self._register.update({'SP': 'R0', 'local': 'R1', 'argument': 'R2',
                                    'pointer': 'R3', 'this': 'R3', 'that': 'R4',
-                                   'temp': 'R5', 'REG_COPY': 'R13', 'FRAME': 'R14',
-                                   'RET': 'R15'})
+                                   'temp': 'R5', 'REG_COPY': 'R13', 'FRAME': 'R15',
+                                   'RET': 'R14'})
 
         if file_order == VMtranslator.FIRST_FILE:
 
@@ -112,7 +114,7 @@ class CodeWriter:
         self.change('M', 'D')
 
         # call Sys.init
-        self.write_call('Sys.init', '1')
+        self.write_call('Sys.init', '0')
 
     def write_call(self, function_name, num_of_args):
         """
@@ -124,10 +126,8 @@ class CodeWriter:
         # code stream a unique symbol that serves as a return address, namely
         # the memory location of the command following the function call.
 
-        self._asm_lines.append("// CALL " + function_name + " " + str(Parser.label_num))
-        return_address_label_name = 'ret.' + function_name + str(Parser.label_num)
-        if function_name != 'Sys.init':
-            Parser.label_num += 1
+        self._asm_lines.append("// CALL " + function_name + " " + str(Parser.call_num))
+        return_address_label_name = function_name + '$ret' + str(Parser.call_num)
         self._asm_lines.append("// push return-address")
         # push return-address using the label declared below
         self.append_address(return_address_label_name)
@@ -170,6 +170,7 @@ class CodeWriter:
         self._asm_lines.append("// label for return address")
         self.append_label(return_address_label_name)
 
+        Parser.call_num += 1
 
     def restore_segment_of_caller(self, segment, index, operation):
         """
@@ -181,7 +182,7 @@ class CodeWriter:
 
         self._asm_lines.append("// restore " + segment + "=*(FRAME-" + str(index) + ")")
 
-        self.append_address(self._segment.get('frame'))
+        self.append_address(self._register.get('FRAME'))
         self.change('D', 'M')
         self.append_address(index)
         self.change('D', 'D-A')
@@ -212,13 +213,13 @@ class CodeWriter:
         self._asm_lines.append("// FRAME=LCL")
         self.append_address(self._segment.get('local'))
         self.change('D', 'M')
-        self.append_address(self._segment.get('frame'))
+        self.append_address(self._register.get('FRAME'))
         self.change('M', 'D')
 
 
 
         # RET=*(FRAME-5)
-        self.restore_segment_of_caller(self._segment.get('ret'), 5, '-')
+        self.restore_segment_of_caller(self._register.get('RET'), 5, '-')
 
         # *ARG = POP
         self.pop_register_or_memory_segment(self._segment.get('argument'), 0, 'M')
@@ -244,7 +245,7 @@ class CodeWriter:
 
         # JMP to the address in RET
         self._asm_lines.append("// goto return address(in the caller's code)")
-        self.append_address(self._segment.get('ret'))
+        self.append_address(self._register.get('RET'))
         self.change('A', 'M')
         self._asm_lines.append('0;JMP')
 
@@ -350,6 +351,7 @@ class CodeWriter:
 
         else:
             print("Invalid Arithmetic command")
+
 
     def base_handle(self, command):
         """

@@ -3,10 +3,12 @@ import CodeWriter
 import os
 COMMENT = "//"
 
-
 # we save the number of the label we will generate so it will makes the labels
 #  with different names.
 label_num = 0
+call_num = 0
+
+
 class Parser:
     """ Handles the parsing of a single .vm file, and encapsulates access to the input
         code. It reads VM commands, parses them, and provides convenient access to their
