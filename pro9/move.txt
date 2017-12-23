@@ -1,0 +1,26 @@
+class Move{
+	field int row;
+	field int left;
+	field int right;
+
+
+	constructor Move new(int playerRow, int playerLeft, int playerRight){
+		let row = playerRow;
+		let left = playerLeft;
+		let right = playerRight;
+		}
+	
+	method int getLeftMoveBound(){
+		return left;
+		}
+	
+	method int getRightMoveBound(){
+		return right;
+		}
+	
+	method int getRowMoveBound(){
+		return row;
+		}
+		
+	
+		

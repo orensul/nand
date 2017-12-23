@@ -1,0 +1,149 @@
+class BoardGame {
+	static Array board;
+	static Array lineOne;
+	static Array lineTwo;
+	static Array lineFour;
+	static Array lineThree;
+	static Array lineFive;
+	
+	int numberOfRows;
+	let numberRows = 5;
+	
+	field int numOfMarkedSticks;
+	let numOfMarkedSticks = 25;
+
+	
+	constructor BoardGame new(){
+	
+		function void initializeArrayWhithOne (Array a, int len){
+			var int i = 0;
+			while(i< len + 1){ 
+				a[i] = 1;
+				i++;}
+			return;
+		}
+	
+	
+		let lineOne = new Array(1);
+		initializeArrayWhithOne (lineOne, 1);
+	
+		let lineTwo = new Array(3);
+		initializeArrayWhithOne(lineTwo, 3)
+	
+		let lineThree = new Array(5);
+		initializeArrayWhithOne(lineThree, 5)
+	
+		let lineFour = new Array(7);
+		initializeArrayWhithOne(lineFour, 7)
+	
+		let lineFive = new Array(9);
+		initializeArrayWhithOne(lineFive, 9)
+	
+		let Board = new Array(5);
+		let Board[0] = lineOne;
+		let Board[1] = lineTwo;
+		let Board[2] = lineThree;
+		let Board[3] = lineFour;
+		let Board[4] = lineFive;
+		
+		BoardGame Board = Board;
+		return Board;
+		
+	}
+	
+	method int getNumOfUnmarkedSticks(){
+		return numOfMarkedSticks;
+		}
+	
+	
+	function printBoardLine(Array a, int len){
+		var int i = 0;
+		while(i< len + 1){ 
+			printInt(a[i])
+				i++;
+			}
+		return;
+	}
+	
+	function int convertRowNumToRowLength(int rowNumber){
+		if( rowNum<1){
+			return -1;
+			}
+		if(rowNum>numberOfRows){
+			return-1;
+			}
+		if ( rowNumber == 1){
+			return 1;
+			}
+		if (rowNumber == 2){
+			return 3;
+			}
+		if (rowNumber == 3){
+			return 5;
+			}
+		if (rowNumber == 4){
+			return 7;
+			}
+		if (rowNumber == 5){
+			return 9;
+			}
+		}
+	
+	method void print board(){
+		int i;
+		let i = 0;
+		while(i<5){
+			rowLength = convertRowNumToRowLength(i);
+			printBoardLine(i, rowLength)
+			i++;
+			}
+		return;
+	}
+	
+	method int markStickSequence(Move move){
+		int rowNum;
+		int leftBound;
+		int rightBound;
+		
+		rowNum = move.getRowMoveBound();
+		leftBound = move.getLeftMoveBound();
+		rightBound = getRightMoveBound();
+		rowLength = convertRowNumToRowLength(rowNum);
+		if (leftBound<1) ){
+			return -1;
+			}
+		if (leftBound>rightBound){
+			return -1;
+			}
+		if(rightBound>rowLength){
+			return-1;
+			}
+		int j;
+		let j=leftBound-1;
+		while(j<rightBound){
+			Array curRow;
+			let curRow = board[rowNum-1];
+			if (curRow[j]==1){
+				curRow[j]=0;
+				}
+			else{
+				int back;
+				let back = j-1 ;
+				while(back>leftBound){
+					curRow[back] = 1;
+					}
+				return -2;
+			}
+			j++;
+		}
+		numOfMarkedSticks += (rightBound - leftBound+1);
+		return 0;
+		}
+		
+
+	
+		
+	
+		
+	
+	
