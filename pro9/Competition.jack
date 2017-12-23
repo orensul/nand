@@ -1,0 +1,118 @@
+class Competition {
+	var static int PLAYERONE;
+	let PLAYERONE = 1;
+	
+	var static int PLAYERTWO;
+	let PLAYERTWO =2;
+	
+	var static int VALIDMOVE;
+	let VALIDMOVE = 0;
+	
+	var static int MOVEEXCEEDBOUND;
+	let MOVEEXCEEDBOUND = -1;
+	
+	var static int NOSTICK;
+	let NOSTICK = 2;
+	
+
+	var int player1Score;
+	var int player2Score;
+	
+	var Player player1;
+	var Player player2;
+	var String displayMessage;
+	
+	constructor Competition new(Player player1,Player player2){
+		let player1 = player1;
+		let player2 = player2;
+		let numOfRounds = numOfRounds;
+	}
+	
+	
+	method int getPlayerScore(int playerNum){
+		if (playerNum == player1){
+			return player1Score;
+		}else {
+		return player2Score;
+	}
+	
+	method void playMultipleRounds(int numOfRounds){
+		do Output.printString("starting a nim competition, number of rounds:")
+		do Output.printint(numOfRounds);
+		var int i;
+		let i = 0;
+		while ( i<numOfRounds){
+			do playSingleGame();
+			let i = i +1;
+		}
+		do Output.printString("the results are: player1")
+		do Output.printint(player1Score);
+		do Output.printString("player2");
+		do Output.printint(player2Score);
+		if (player1Score > player2Score){
+			do Output.printString("player1 win");
+		}else if (player1Score < player2Score){
+			do Output.printString("player2 win");
+		}else{
+			do Output.printString("it is teco");
+	}
+	
+	method void playSingleGame(){
+		var BoardGame board;
+		let board = BoardGame.new();
+		do Output.printString("welcome to the nim game!");
+		int var currentPlayer;
+		let currentPlayer = PLAYERONE;
+		
+		while (board.getNumOfUnmarkedSticks() >0){
+			do Output.printString("player:");
+			do Output.printint(currentPlayer);
+			do Output.printString("it is now your turn!");
+			
+			var int validMove;
+			let validMove = 3;
+			
+			var Move move;
+			let move = Move.new(0,0,0);
+			
+			while ( validMove < VALIDMOVE){
+				if (currentPlayer == PLAYERONE){
+					let move = player1.produceMove(board);
+				}else{
+					let move = player2.produceMove(board);
+				}
+				let validMove = board.markStickSequence(move);
+				
+				if (validMove >0){
+					do Output.printString("the move:");
+					do move.printMove();
+					do Output.printString("is invalid move");
+				}	
+			
+				do Output.printString("player:");
+				do Output.printint(currentPlayer);
+				do move.printMove();
+			
+				if(currentPlayer == PLAYERONE){
+					let currentPlayer = PLAYERTWO;
+				}else{
+					let currentPlayer = PLAYERTWO;
+				}
+			}
+			
+			if ( currentPlayer == PLAYERONE){
+				let player1Score = player1Score +1 ;
+			}else{
+				player2Score = player2Score +1; 
+			}
+			
+			do Output.printString("player:");
+			do Output.printint(currentPlayer);
+			do Output.printString("won!");
+			}
+			
+			
+			
+			
+					
+		

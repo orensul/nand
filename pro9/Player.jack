@@ -1,0 +1,43 @@
+class Player{
+
+	var int playerId; 
+	
+	var char MAKEMOVE;
+	let MAKEMOVE =2;
+	
+	char DESPLAYBPARD;
+	let DESPLAYBPARD = 1;
+	
+	var char userInput;
+	
+	constructor Player new(int id){
+		let playerId = id;
+	}
+
+	method int playerId(){
+		return playerId;
+	}
+	
+	method Move produceMove (Board board){
+			let userInput =  DESPLAYBPARD;
+			while ( userInput != MAKEMOVE){
+				let userInput = Keyboard.readInt("press 0 to display the board. press 1 to make move:"));
+				if (userInput == DESPLAYBPARD){
+						do board.printBoard();
+				}
+				else if (userInput != MAKEMOVE){
+					do Output.printString("unsupported command");
+				}
+			}
+			
+			var int row;
+			let row = Keyboard.readInt("enter the row number:");
+			var int leftStick;
+			let leftStick = Keyboard.readInt("enter the index of the leftmost stick:");
+			var int rightStick;
+			let rightStick = Keyboard.readInt("enter the index of the rightmost stick:");
+			
+			var Move move;
+			let move = Move.new(row, leftStick,rightStick);
+			
+			return move;

@@ -1,0 +1,16 @@
+class Main{
+	
+	function Main{
+		var int gameNume;
+		let gameNum = Keyboard.readInt("enter the row number:");
+	
+		var Player player1;
+		let player1 = Player.new(1);
+	
+		var Player player2;
+		let player2 = Player.new(2);
+	
+		var Competition competition;
+		let competition = Competition.new(player1,player2,);
+		do competition.playMultipleRounds(gameNum);
+	}

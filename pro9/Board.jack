@@ -1,0 +1,152 @@
+class BoardGame {
+	var static Array board;
+	var static Array lineOne;
+	var static Array lineTwo;
+	var static Array lineFour;
+	var static Array lineThree;
+	var static Array lineFive;
+	
+	var int numberOfRows;
+	let numberRows = 5;
+	
+	var int numOfMarkedSticks;
+	let numOfMarkedSticks = 25;
+
+	
+	constructor BoardGame new(){
+		function void initializeArrayWhithOne (Array a, int len){
+			var int i;
+			let i= 0;
+			while(i< len + 1){ 
+				let a[i] = 1;
+				let i = i+1;
+			}
+			return;
+		}
+	
+	
+		let lineOne = Array.new(1);
+		do initializeArrayWhithOne (lineOne, 1);
+	
+		let lineTwo = Array.new(3);
+		do initializeArrayWhithOne(lineTwo, 3)
+	
+		let lineThree = Array.new(5);
+		do initializeArrayWhithOne(lineThree, 5)
+	
+		let lineFour = Array.new(7);
+		do initializeArrayWhithOne(lineFour, 7)
+	
+		let lineFive = Array.new(9);
+		do initializeArrayWhithOne(lineFive, 9)
+	
+		let Board = new Array(5);
+		let Board[0] = lineOne;
+		let Board[1] = lineTwo;
+		let Board[2] = lineThree;
+		let Board[3] = lineFour;
+		let Board[4] = lineFive;
+		
+		var BoardGame board 
+		let board = BoardGame.new();
+		return Board;
+		
+	}
+	
+	method int getNumOfUnmarkedSticks(){
+		return numOfMarkedSticks;
+		}
+	
+	
+	function printBoardLine(Array a, int len){
+		var int i;
+		let i = 0;
+		while(i< len + 1){ 
+			Output.printInt(a[i]);
+				let i= i+1;
+			}
+		return;
+	}
+	
+	function int convertRowNumToRowLength(int rowNumber){
+		if(rowNum>numberOfRows){
+			return 1;
+			}
+		if ( rowNumber == 1){
+			return 1;
+			}
+		if (rowNumber == 2){
+			return 3;
+			}
+		if (rowNumber == 3){
+			return 5;
+			}
+		if (rowNumber == 4){
+			return 7;
+			}
+		if (rowNumber == 5){
+			return 9;
+			}
+		}
+	
+	method void printBoard(){
+		int i;
+		let i = 0;
+		while(i<5){
+			do rowLength = convertRowNumToRowLength(i);
+			do printBoardLine(i, rowLength)
+			let i=i+1;
+			}
+		return;
+	}
+	
+	method int markStickSequence(Move move){
+		int rowNum;
+		int leftBound;
+		int rightBound;
+		
+		let rowNum = move.getRowMoveBound();
+		let leftBound = move.getLeftMoveBound();
+		let rightBound = getRightMoveBound();
+		let rowLength = convertRowNumToRowLength(rowNum);
+		if (rowNum < 1)
+			return 1;
+		if (leftBound<1) ){
+			return 1;
+			}
+		if (leftBound>rightBound){
+			return 1;
+			}
+		if(rightBound>rowLength){
+			return 1;
+			}
+		int j;
+		let j=leftBound-1;
+		while(j<rightBound){
+			var Array curRow;
+			let curRow = board[rowNum-1];
+			if (curRow[j]==1){
+				let curRow[j]=0;
+				}
+			else{
+				int back;
+				let back = j-1 ;
+				while(back>leftBound){
+					let curRow[back] = 1;
+					}
+				return 1;
+			}
+			let j = j+1;
+		}
+		let numOfMarkedSticks =  numOfMarkedSticks + (rightBound - leftBound+1);
+		return 0;
+		}
+		
+
+
+	
+		
+	
+		
+	
+	
