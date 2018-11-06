@@ -1,0 +1,155 @@
+ // This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * A basic math library.
+ */
+class Math {
+    static Array twoToThe; 
+    static int qy;
+
+
+    /** Initializes the library. */
+    function void init() {
+        var int i, powerOfTwo;
+        let twoToThe = Array.new(16);
+        let powerOfTwo = 1;
+        let i = 0;
+
+        // for each 0<=i<=15 twoToThe[i] = 2^i
+        while (i < 16){
+            let twoToThe[i] = powerOfTwo;
+            let i = i + 1;
+            let powerOfTwo = powerOfTwo + powerOfTwo;   
+        }
+        return;
+    }
+
+    /**  Returns true if the j bit of the integer x is 1 and false otherwise. */
+    function boolean bit(int x, int j) {
+        return ~((twoToThe[j] & x) = 0);
+        
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {
+        if (x < 0){
+            return -x;
+        }
+        return x;
+    }
+
+    /** Returns the product of x and y. 
+     *  When a Jack compiler detects the multiplication operator '*' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x*y and multiply(x,y) return the same value.
+     */
+    function int multiply(int x, int y) {
+    
+        var int sum, j, shiftedX;
+        let sum = 0;
+        let shiftedX = x;
+        let j = 0;
+    
+        while (j < 16){
+            if(Math.bit(y, j)) {
+                let sum = sum + shiftedX;
+            }
+            let shiftedX = shiftedX + shiftedX;
+            let j = j + 1;
+        }
+        return sum;
+    }
+
+    function int recursiveDivide(int x, int y) {
+        
+        var int q;
+
+        // stop condition (base case)
+        if((x < y) | (y < 0)) {
+            let qy = 0;
+            return qy;
+        }
+
+        // recursive member
+        let q = Math.recursiveDivide(x, y + y);
+        
+        // if q is odd
+        if(Math.bit(q, 0) = true) { 
+            let qy = qy + y;
+        }
+        if((x - (qy + qy)) < y) {
+            return (q + q);
+        }
+        return (q + q + 1);
+        
+    }
+     /** Returns the integer part of x/y. */
+    function int divide(int x, int y) {
+        var int q;
+        var bool diffSign;
+        let diffSign = false;
+
+        // Division by zero
+        if (y = 0) {
+            do Sys.error(3); 
+        }
+
+        if (((x < 0) & (y > 0)) | ((x > 0) & (y < 0))) {
+            let diffSign = true;
+        }
+        let x = Math.abs(x);
+        let y = Math.abs(y);
+
+        let q = Math.recursiveDivide(x, y);
+
+        if (diffSign){
+            return -q;
+        }
+        return q;
+
+    }
+    
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {
+        var int y, j, power, temp;
+        let y = 0;
+        let j = 7;
+
+        // Cannot compute square root of a negative number
+        if (x < 0){
+            do Sys.error(4);
+        }
+        while (~(j < 0)){
+            let temp = y + twoToThe[j];
+            let power = temp * temp;
+            if ((power > 0) & ~(power > x)){
+                let y = temp;
+            }
+            let j = j - 1;
+        }
+        return y;
+    }
+
+    /** Returns the greater number. */
+    function int max(int a, int b) {
+        if (a > b){
+            return a;
+        }
+        return b;
+    }
+
+    /** Returns the smaller number. */
+    function int min(int a, int b) {
+        if (a < b){
+            return a;
+        }
+        return b;
+    }
+
+    function int twoToThe(int i){
+        return twoToThe[i];
+    }
+}

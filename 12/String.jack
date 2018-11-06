@@ -1,0 +1,201 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/String.jack
+
+/**
+ * Represents a String object. Implements the String type.
+ */
+class String {
+
+    field Array str;
+    field int str_length, str_max_length;
+
+
+    /** Constructs a new empty String with a maximum length of maxLength. */
+    constructor String new(int maxLength) {
+        // Maximum length must be non-negative
+        if (maxLength < 0) {
+            do Sys.error(14);
+        }
+        if (maxLength = 0){
+            let maxLength = 1;
+        }
+        
+        let str_max_length = maxLength;
+        let str = Array.new(maxLength);
+        let str_length = 0;
+        return this;
+    }
+
+    /** De-allocates the string and frees its space. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Returns the current length of this String. */
+    method int length() {
+        return str_length;
+    }
+
+    /** Returns the character at location j. */
+    method char charAt(int j) {
+        if ((j < str_length) & (j > -1)){
+            return str[j];
+        }
+        // String index out of bounds
+        do Sys.error(15);
+        return 0;
+    }
+
+    /** Sets the j'th character of this string to be c. */
+    method void setCharAt(int j, char c) {
+        if ((j < str_length) & (j > -1)){
+            let str[j] = c;
+            return;
+        }
+        // String index out of bounds
+        do Sys.error(16);
+        return;
+    }
+
+    /** Appends the character c to the end of this String.
+     *  Returns this string as the return value. */
+    method String appendChar(char c) {
+        // String is full
+        if (str_length = str_max_length) {
+            do Sys.error(17); 
+        }
+        else{
+            let str[str_length] = c;
+            let str_length = str_length + 1;
+        }
+        return this;
+    }
+
+    /** Erases the last character from this String. */
+    method void eraseLastChar() {
+        // String is empty
+        if (str_length = 0){
+            do Sys.error(18);
+        }
+        let str_length = str_length - 1;
+        return;
+    }
+
+
+    /** Returns true if the string is empty, otherwise, false. */
+    function boolean isEmptyStr(int str_length){
+        return (str_length = 0);
+    }
+
+    /** Returns true if the string first sign is '-' (negative), otherwise, false. */
+    function boolean isNegativeStr(String str){
+        return (str[0] = 45);
+    }
+
+    /** Returns the integer value of this string, until a non-digit character is detected. */
+    method int intValue() {
+        var int result, i;
+        
+        // if it's an empty string we want to stop here and return 0 as integer
+        if (String.isEmptyStr(str_length)) { 
+            return 0; 
+        }
+
+        let i = 0;
+        if (String.isNegativeStr(str)) { 
+            let i = i + 1;
+        }
+
+        // while we do not reach end of string and the next char is digit
+        while(String.isDigit(str[i]) & (i < str_length)){
+            // assemble the number
+            let result = (result * 10) + (String.charToNumericVal(str[i]));
+            let i = i + 1;
+        }
+        // add '-' before if it's negative.
+        if (String.isNegativeStr(str)){
+            return -result;
+        }
+        return result;
+    }
+    
+    /** Returns True if the char c is a digit, otherwise, false. */
+    function boolean isDigit(char c) {
+        return (c > 47) & (c < 58);
+    }
+
+    /** Sets this string to hold a representation of the given value. */
+    method void setInt(int val) {
+        var int numberOfDigitsVal, temp;
+        let numberOfDigitsVal = 0;
+        let temp = Math.abs(val);
+
+        // clear string before it will holds the value
+        let str_length = 0;
+        
+        while (temp > 0){
+            let numberOfDigitsVal = numberOfDigitsVal + 1;
+            let temp = temp / 10;
+        }
+
+        // Insufficient string capacity
+        if (numberOfDigitsVal > str_max_length){
+            do Sys.error(19);   
+        }
+
+        // if negative number so we want to add '-' before
+        if (val < 0){
+            // append '-' before val
+            do appendChar(45);
+            let val = - val; 
+        }
+        // converts the integer val to String
+        do int2String(val);
+        return;
+    }
+    /** Returns the string representation of a non-negative integer. */
+    method void int2String(int val){
+        var int div, mod;
+        var char c;
+        let div = val / 10;
+        let mod = val - (div * 10);
+        let c = String.numbericDigitToChar(mod);
+        if (val < 10){
+            do appendChar(c);
+        }
+        else{
+            do int2String(div);
+            do appendChar(c);
+        }
+        return;
+    }
+    
+
+    /** Returns the numeric value represented by an ASCII code 48 <=c<= 57 */
+    function int charToNumericVal(char c) {
+        return c - 48;
+    }
+    
+    /** Returns the ASCII code of a given digit 0<=x<=9, by adding x to 48 - 􏰁the code of ‘0’*/
+    function char numbericDigitToChar(int x) {
+        return 48 + x;
+    }
+
+    /** Returns the new line character. */
+    function char newLine() {
+        return 128;
+    }
+
+    /** Returns the backspace character. */
+    function char backSpace() {
+        return 129;
+    }
+
+    /** Returns the double quote (") character. */
+    function char doubleQuote() {
+        return 34;
+    }
+}

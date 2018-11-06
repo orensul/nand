@@ -1,0 +1,225 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 512 rows (indexed 0..511, top to bottom)
+ * of 256 pixels each (indexed 0..255, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+    static boolean isBlackColor;
+    static Array screen;
+    static int SCREEN_START, SCREEN_END, SCREEN_SIZE, HACK_SCREEN_ROWS, 
+    HACK_SCREEN_COLS, RADIUS_SIZE;
+
+    /** Initializes the Screen. */
+    function void init() {
+        let RADIUS_SIZE = 181;
+        let HACK_SCREEN_ROWS = 256;
+        let HACK_SCREEN_COLS = 512;
+        let SCREEN_START = 16384;
+        let SCREEN_END = 24576;
+        let SCREEN_SIZE = SCREEN_END - SCREEN_START;
+        let isBlackColor = true;
+        let screen = 16384;
+        return; 
+    }
+
+    /** Erases the entire screen. */
+    function void clearScreen() {
+        var int pos;
+        let pos = 0;
+        // clean all pixels of the screen
+        while(pos < SCREEN_SIZE) {
+            let screen[pos] = false;
+        let pos = pos + 1;
+        }
+        return;
+    }
+
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
+    function void setColor(boolean b) {
+        let isBlackColor = b;
+        return;
+    }
+    /** Return address given (x,y) coordinates. */
+    function int calcAddress(int x, int y) {
+        var int xdiv16, y32, address;
+        let y32 = 32 * y;
+        let xdiv16 = x / 16;
+        let address = y32 + xdiv16 + SCREEN_START;
+        return address;
+    }
+
+    /** Return true if x coordinate in hack screen range, otherwise, false. */
+    function boolean xCoordInRange(int x){
+        return (~((x < 0) | (x > HACK_SCREEN_COLS)));
+    }
+
+
+    /** Return true if y coordinate in hack screen range, otherwise, false. */
+    function boolean yCoordInRange(int y){
+        return (~((y < 0) | (y > HACK_SCREEN_ROWS)));
+    }
+
+    /** Return true if radius <= RADIUS_SIZE, otherwise, false. */
+    function boolean rInRange(int r){
+        return (~((r < 0) | ( r > RADIUS_SIZE)));
+    }
+
+    /** Draws the (x,y) pixel, using the current color. */
+    function void drawPixel(int x, int y) {
+        var int address, value, mask;
+
+        // check for Illegal pixel coordinates
+        if (~(Screen.xCoordInRange(x) & Screen.yCoordInRange(y))) {
+                do Sys.error(7);
+        }
+        let address =  Screen.calcAddress(x,y);
+        let value = Memory.peek(address);
+        
+        // mask is a 16 bit number s.t the x%16 bit is 1(turned on), the rest 0(turned off)
+        let mask = Math.twoToThe(x & 15); 
+
+        // if isBlackColor = true so value's x%16 bit will be 1 because we have or with mask 
+        // which contains 1 in his x%16 bit
+        // if isBlackColor = false so value's x%16 bit will be 0 because we have ~mask which 
+        // contains 0 in his x%16 bit and then & with everything (specifically with value) is 0
+        if (isBlackColor){
+            let value = value | mask;
+        }
+        else{
+            let value = value & ~mask;
+        }
+
+        do Memory.poke(address, value);
+        return;
+    }
+    
+
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int a, b, dx, dy, diff, aAdvance, bAdvance;
+        let a = 0;
+        let b = 0;
+        let diff = 0;
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+
+        // check for Illegal line coordinates error
+        if (~(Screen.xCoordInRange(x1) & Screen.xCoordInRange(x2) & Screen.yCoordInRange(y1) &
+        Screen.yCoordInRange(y2))) {
+                do Sys.error(8);
+            }
+
+        // base case 1 with optimal solution for drawVerticalLine
+        if (x1 = x2) {
+            do Screen.drawVerticalLine(x1, Math.min(y1, y2), Math.max(y1, y2));
+            return;
+        }
+    
+        // base case 2 with optimal solution for drawHorizontalLine
+        if (y1 = y2) {
+            do Screen.drawHorizontalLine(y1, Math.min(x1, x2), Math.max(x1, x2));
+            return;
+        }
+        // decide which direction to advance
+        if (dx < 0){
+            let aAdvance = -1;
+        }
+        else{
+            let aAdvance = 1;
+        }
+        if (dy < 0){
+            let bAdvance = -1;
+        }
+        else{
+            let bAdvance = 1;
+        }
+
+
+        let dx = Math.abs(dx);
+        let dy = Math.abs(dy);
+
+        while (~(Math.abs(a) > dx) & ~(Math.abs(b) > dy)){
+            do Screen.drawPixel(x1 + a, y1 + b);
+            // decide if to go right, or up
+            if (diff < 0){
+                let a = a + aAdvance;
+                let diff = diff + dy;
+            }
+            else{
+                let b = b + bAdvance;
+                let diff = diff - dx;
+            }
+        }
+        return;
+    }
+
+    function void drawVerticalLine(int x, int y1, int y2) {
+        while (~(y2 < y1)) {
+            do Screen.drawPixel(x, y1);
+            let y1 = y1 + 1;
+        }
+        return;
+    }
+    
+    function void drawHorizontalLine(int y, int x1, int x2){
+        var int address;
+        while(~(x2 < x1)){
+            if (((x2 - x1) > 15) & (x1 & 15 = 0)){
+                // check for optimize solution - color 16 bits at once 
+                let address = screen + (y * 32) + (x1 / 16);
+                do Memory.poke(address, isBlackColor);
+                let x1 = x1 + 16;
+            }
+            else{
+            do Screen.drawPixel(x1, y);
+            let x1 = x1 + 1;
+            }
+        }
+        return;
+    }
+    
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     * and bottom right corner is (x2,y2), using the current color. */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+
+        // check for Illegal rectangle coordinates error
+        if (~(Screen.xCoordInRange(x1) & Screen.xCoordInRange(x2) & Screen.yCoordInRange(y1) &
+        Screen.yCoordInRange(y2))) {
+                do Sys.error(9);
+            }
+
+        while(~(y2 < y1)){
+                do Screen.drawHorizontalLine(y1, x1, x2);
+                let y1 = y1 + 1;
+            }
+        return;
+    }
+
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int x, int y, int r) {
+        var int dy, dx;
+        // check for Illegal center coordinates error
+        if (~(Screen.xCoordInRange(x) & Screen.yCoordInRange(y))) {
+            do Sys.error(12);
+        }
+        // check for Illegal radius error
+        if (~(Screen.rInRange(r))) {
+            do Sys.error(13);
+        }
+
+        let dy = -r;
+        while (~(dy > r)){
+            let dx = Math.sqrt((r * r) - (dy * dy));
+            do Screen.drawHorizontalLine(y + dy, x - dx, x + dx);
+        let dy = dy + 1;
+        }
+        return;
+    }
+}
